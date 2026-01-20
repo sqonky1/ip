@@ -6,6 +6,9 @@ public class Sqonky {
                 + "What can I do for you?\n";
         System.out.println(hello);
 
+        String[] tasks = new String[100];
+        int count = 0;
+
         Scanner sc = new Scanner(System.in);
 
         while (true) {
@@ -13,8 +16,20 @@ public class Sqonky {
             if (command.equals("bye")) {
                 break;
             }
-            System.out.println(command);
+            else if (command.equals("list")) {
+                for (int i = 0; i < count; i++) {
+                    int num = i + 1;
+                    System.out.println(num + ". " + tasks[i]);
+                }
+            }
+            else {
+                tasks[count] = command;
+                count++;
+                System.out.println("added: " + command);
+            }
         }
+
+        sc.close();
 
         System.out.println("Bye. Hope to see you again soon!\n");
     }

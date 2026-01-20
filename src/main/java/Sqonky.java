@@ -1,11 +1,21 @@
+import java.util.Scanner;
+
 public class Sqonky {
     public static void main(String[] args) {
-        String hello = " ____________________________________________________________\n"
-                + " Hello! I'm Sqonky\n"
-                + " What can I do for you?\n"
-                + "____________________________________________________________\n";
-        String goodbye = " Bye. Hope to see you again soon!\n"
-                + "____________________________________________________________\n";
-        System.out.println(hello + goodbye);
+        String hello = "Hello! I'm Sqonky\n"
+                + "What can I do for you?\n";
+        System.out.println(hello);
+
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            String command = sc.nextLine();
+            if (command.equals("bye")) {
+                break;
+            }
+            System.out.println(command);
+        }
+
+        System.out.println("Bye. Hope to see you again soon!\n");
     }
 }

@@ -1,12 +1,11 @@
 import java.util.Scanner;
+import java.util.ArrayList;
 
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
  */
 public class Sqonky {
-    protected static final int MAX_TASKS = 100;
-
     /**
      * Runs the Sqonky command-line application.
      * Continuously reads user input, routes commands to specific handlers,
@@ -17,9 +16,7 @@ public class Sqonky {
     public static void main(String[] args) {
         System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
 
-        Task[] tasks = new Task[MAX_TASKS];
-        int count = 0;
-
+        ArrayList<Task> tasks = new ArrayList<>();
         Scanner sc = new Scanner(System.in);
 
         while (true) {
@@ -30,12 +27,14 @@ public class Sqonky {
 
             try {
                 if (command.equals("list")) {
-                    listTasks(tasks, count);
+                    listTasks(tasks);
                 } else if (command.startsWith("mark") || command.startsWith("unmark")) {
-                    markUnmark(command, tasks, count);
+                    markUnmark(command, tasks);
+                } else if (command.startsWith("delete")) {
+                    handleDeleteTask(command, tasks);
                 } else if (command.startsWith("todo") || command.startsWith("deadline")
                         || command.startsWith("event")) {
-                    count = handleAddTask(command, tasks, count);
+                    handleAddTask(command, tasks);
                 } else {
                     throw new SqonkyException("What are you saying...\n");
                 }
@@ -53,13 +52,12 @@ public class Sqonky {
      * Displays all tasks currently stored in the task list to the console.
      *
      * @param tasks The array of Task objects to be printed.
-     * @param count The current number of tasks stored in the array.
      */
-    private static void listTasks(Task[] tasks, int count) {
+    private static void listTasks(ArrayList<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < tasks.size(); i++) {
             int num = i + 1;
-            System.out.println(num + "." + tasks[i]);
+            System.out.println(num + "." + tasks.get(i));
         }
         System.out.println();
     }
@@ -70,10 +68,9 @@ public class Sqonky {
      *
      * @param command The raw user input string (which starts with mark or unmark).
      * @param tasks   The array containing the Task objects.
-     * @param count   The current number of tasks to validate the index against.
      * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
      */
-    private static void markUnmark(String command, Task[] tasks, int count)
+    private static void markUnmark(String command, ArrayList<Task> tasks)
             throws SqonkyException {
         if (command.equals("mark") || command.equals("unmark")) {
             // Exception 1: Task number not provided
@@ -83,21 +80,26 @@ public class Sqonky {
         try {
             int idx = Integer.parseInt(command.split(" ")[1]) - 1;
 
-            if (idx < 0 || idx >= count) {
+            if (idx < 0 || idx >= tasks.size()) {
                 // Exception 2: Invalid index number
                 throw new SqonkyException("I can't find task " + (idx + 1)
-                        + ". You have " + count + " tasks.\n");
+                        + ". You have " + tasks.size() + " tasks.\n");
             }
 
             if (command.startsWith("mark ")) {
-                tasks[idx].mark();
+                tasks.get(idx).mark();
             } else {
-                tasks[idx].unmark();
+                tasks.get(idx).unmark();
             }
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: mark [number]\n");
         }
+    }
+
+    private static void handleDeleteTask(String command, ArrayList<Task> tasks)
+            throws SqonkyException {
+
     }
 
     /**
@@ -107,20 +109,16 @@ public class Sqonky {
      *
      * @param command The raw user input string for creating a task.
      * @param tasks   The array where the new task will be stored.
-     * @param count   The current task count.
-     * @return The updated task count after the addition.
      * @throws SqonkyException If the task creation fails due to invalid input.
      */
-    private static int handleAddTask(String command, Task[] tasks, int count)
+    private static void handleAddTask(String command, ArrayList<Task> tasks)
             throws SqonkyException {
         Task t = addTask(command);
-        tasks[count] = t;
-        count++;
+        tasks.add(t);
         System.out.println("Got it. I've added this task:\n  "
                 + t
-                + "\nNow you have " + count + " " + (count == 1 ? "task" : "tasks")
+                + "\nNow you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
                 + " in the list.\n");
-        return count;
     }
 
     /**

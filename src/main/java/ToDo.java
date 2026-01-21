@@ -1,5 +1,3 @@
-package main.java;
-
 /**
  * Represents a task without any associated date or time.
  */
@@ -9,6 +7,6 @@ public class ToDo extends Task {
     }
 
     public String toString() {
-        return String.format("[T] %s", super.toString());
+        return String.format("[T]%s", super.toString());
     }
 }

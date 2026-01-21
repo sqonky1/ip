@@ -1,5 +1,3 @@
-package main.java;
-
 /**
  * Represents a task that occurs over a specific time period.
  */
@@ -13,6 +11,6 @@ public class Event extends Task{
     }
 
     public String toString() {
-        return String.format("[E] %s (from: %s to: %s)", super.toString(), from, to);
+        return String.format("[E]%s (from: %s to: %s)", super.toString(), from, to);
     }
 }

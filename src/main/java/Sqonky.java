@@ -1,12 +1,9 @@
-package main.java;
-
 import java.util.Scanner;
 
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
  */
-
 public class Sqonky {
     protected static final int MAX_TASKS = 100;
 
@@ -35,6 +32,7 @@ public class Sqonky {
                     int num = i + 1;
                     System.out.println(num + "." + tasks[i]);
                 }
+                System.out.println();
             } else if (command.startsWith("mark ")) {
                 int idx =Integer.parseInt(command.split(" ")[1]) - 1;
 
@@ -54,7 +52,7 @@ public class Sqonky {
                     count++;
                     System.out.println("Got it. I've added this task:\n  "
                             + t
-                            + "\nNow you have " + count + " " + (count == 1 ? "task" : "tasks") + " in the list.");
+                            + "\nNow you have " + count + " " + (count == 1 ? "task" : "tasks") + " in the list.\n");
                 }
             }
         }

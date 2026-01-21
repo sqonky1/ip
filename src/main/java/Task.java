@@ -1,5 +1,3 @@
-package main.java;
-
 /**
  * Represents a generic task with a description and completion status.
  */
@@ -18,12 +16,12 @@ public class Task {
 
     public void mark() {
         this.isDone = true;
-        System.out.println("Nice! I've marked this task as done:\n" + this);
+        System.out.println("Nice! I've marked this task as done:\n" + this + "\n");
     }
 
     public void unmark() {
         this.isDone = false;
-        System.out.println("OK, I've marked this task as not done yet:\n" + this);
+        System.out.println("OK, I've marked this task as not done yet:\n" + this + "\n");
     }
 
     @Override

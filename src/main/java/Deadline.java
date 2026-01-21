@@ -1,5 +1,3 @@
-package main.java;
-
 /**
  * Represents a task that must be completed by a specified deadline.
  */
@@ -12,6 +10,6 @@ public class Deadline extends Task {
     }
 
     public String toString() {
-        return String.format("[D] %s (by: %s)", super.toString(), by);
+        return String.format("[D]%s (by: %s)", super.toString(), by);
     }
 }

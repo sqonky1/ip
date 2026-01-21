@@ -33,5 +33,30 @@ Here are the tasks in your list:
 2.[D][ ] return book (by: Sunday)
 3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
 
-Bye. Hope to see you again soon!
+The description of a todo cannot be empty!
 
+The description of a todo cannot be empty!
+
+The description of a deadline cannot be empty!
+
+A deadline must include ' /by ' to specify the date/time!
+
+Enter a valid description and time.
+
+The description of a event cannot be empty!
+
+An event must include ' /from ' and ' /to ' to specify the dates/times!
+
+Enter a valid description and time.
+
+Please provide a task number.
+
+I can't find task 100. You have 3 tasks.
+
+That's not a valid task number! Use: mark [number]
+
+I can't find task 0. You have 3 tasks.
+
+What are you saying...
+
+Bye. Hope to see you again soon!

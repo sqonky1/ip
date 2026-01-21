@@ -1,3 +1,4 @@
+import main.java.Task;
 import java.util.Scanner;
 
 public class Sqonky {
@@ -6,7 +7,7 @@ public class Sqonky {
                 + "What can I do for you?\n";
         System.out.println(hello);
 
-        String[] tasks = new String[100];
+        Task[] tasks = new Task[100];
         int count = 0;
 
         Scanner sc = new Scanner(System.in);
@@ -17,13 +18,22 @@ public class Sqonky {
                 break;
             }
             else if (command.equals("list")) {
+                System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < count; i++) {
                     int num = i + 1;
                     System.out.println(num + ". " + tasks[i]);
                 }
             }
+            else if (command.startsWith("mark ")) {
+                int idx =Integer.parseInt(command.split(" ")[1]) - 1;
+                if (idx >= 0 && idx < count) tasks[idx].mark();
+            }
+            else if (command.startsWith("unmark ")) {
+                int idx =Integer.parseInt(command.split(" ")[1]) - 1;
+                if (idx >= 0 && idx < count) tasks[idx].unmark();
+            }
             else {
-                tasks[count] = command;
+                tasks[count] = new Task(command);
                 count++;
                 System.out.println("added: " + command);
             }

@@ -51,7 +51,7 @@ public class Sqonky {
     /**
      * Displays all tasks currently stored in the task list to the console.
      *
-     * @param tasks The array of Task objects to be printed.
+     * @param tasks The ArrayList of Task objects to be printed.
      */
     private static void listTasks(ArrayList<Task> tasks) {
         System.out.println("Here are the tasks in your list:");
@@ -64,10 +64,10 @@ public class Sqonky {
 
     /**
      * Handles the logic for marking tasks as done or not done.
-     * Validates the task index and updates the status of the task in the array.
+     * Validates the task index and updates the status of the task in the collection.
      *
      * @param command The raw user input string (which starts with mark or unmark).
-     * @param tasks   The array containing the Task objects.
+     * @param tasks   The ArrayList containing the Task objects.
      * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
      */
     private static void markUnmark(String command, ArrayList<Task> tasks)
@@ -97,18 +97,48 @@ public class Sqonky {
         }
     }
 
+    /**
+     * Handles the logic for deleting a task from the list.
+     * Validates the task index, removes the task from the collection, and
+     * provides feedback to the user.
+     *
+     * @param command The raw user input string (starting with delete).
+     * @param tasks   The ArrayList containing the Task objects.
+     * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
+     */
     private static void handleDeleteTask(String command, ArrayList<Task> tasks)
             throws SqonkyException {
+        if (command.equals("delete")) {
+            // Exception 1: Task number not provided
+            throw new SqonkyException("Please provide a task number.\n");
+        }
+        try {
+            int idx = Integer.parseInt(command.split(" ")[1]) - 1;
 
+            if (idx < 0 || idx >= tasks.size()) {
+                // Exception 2: Invalid index number
+                throw new SqonkyException("I can't find task " + (idx + 1)
+                        + ". You have " + tasks.size() + " tasks.\n");
+            }
+
+            Task removed = tasks.remove(idx);
+
+            System.out.println("Noted. I've removed this task:\n  "
+                    + removed + "\n"
+                    + "Now you have " + tasks.size() + " tasks in the list\n");
+
+        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
+        }
     }
 
     /**
      * Manages the high-level flow of adding a task to the list.
-     * It coordinates parsing the command into a Task object, adding it to the array,
-     * and providing feedback to the user.
+     * It coordinates parsing the command into a Task object, adding it to the
+     * collection, and providing feedback to the user.
      *
      * @param command The raw user input string for creating a task.
-     * @param tasks   The array where the new task will be stored.
+     * @param tasks   The ArrayList where the new task will be stored.
      * @throws SqonkyException If the task creation fails due to invalid input.
      */
     private static void handleAddTask(String command, ArrayList<Task> tasks)

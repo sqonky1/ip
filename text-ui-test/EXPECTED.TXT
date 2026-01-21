@@ -59,4 +59,30 @@ I can't find task 0. You have 3 tasks.
 
 What are you saying...
 
+Noted. I've removed this task:
+  [D][ ] return book (by: Sunday)
+Now you have 2 tasks in the list
+
+Here are the tasks in your list:
+1.[T][ ] borrow book
+2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+
+Noted. I've removed this task:
+  [T][ ] borrow book
+Now you have 1 tasks in the list
+
+Noted. I've removed this task:
+  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+Now you have 0 tasks in the list
+
+Here are the tasks in your list:
+
+Please provide a task number.
+
+I can't find task 100. You have 0 tasks.
+
+I can't find task -1. You have 0 tasks.
+
+That's not a valid task number! Use: delete [number]
+
 Bye. Hope to see you again soon!

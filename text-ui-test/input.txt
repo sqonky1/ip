@@ -20,4 +20,13 @@ mark 100
 mark abc
 unmark 0
 blahblah
+delete 2
+list
+delete 1
+delete 1
+list
+delete
+delete 100
+delete -1
+delete abc
 bye

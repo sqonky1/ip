@@ -1,5 +1,8 @@
 package main.java;
 
+/**
+ * Represents a task that occurs over a specific time period.
+ */
 public class Event extends Task{
     protected String from, to;
 

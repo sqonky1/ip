@@ -1,5 +1,8 @@
 package main.java;
 
+/**
+ * Represents a task that must be completed by a specified deadline.
+ */
 public class Deadline extends Task {
     protected String by;
 

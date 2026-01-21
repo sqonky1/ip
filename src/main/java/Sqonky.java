@@ -1,16 +1,26 @@
-import main.java.ToDo;
-import main.java.Deadline;
-import main.java.Event;
-import main.java.Task;
+package main.java;
+
 import java.util.Scanner;
 
+/**
+ * Main application class for Sqonky.
+ * Handles user input and manages the task list.
+ */
+
 public class Sqonky {
+    protected static final int MAX_TASKS = 100;
+
+    /**
+     * Runs the Sqonky command-line application.
+     *
+     * @param args Command-line arguments (not used).
+     */
     public static void main(String[] args) {
         String hello = "Hello! I'm Sqonky\n"
                 + "What can I do for you?\n";
         System.out.println(hello);
 
-        Task[] tasks = new Task[100];
+        Task[] tasks = new Task[MAX_TASKS];
         int count = 0;
 
         Scanner sc = new Scanner(System.in);
@@ -27,10 +37,16 @@ public class Sqonky {
                 }
             } else if (command.startsWith("mark ")) {
                 int idx =Integer.parseInt(command.split(" ")[1]) - 1;
-                if (idx >= 0 && idx < count) tasks[idx].mark();
+
+                if (idx >= 0 && idx < count) {
+                    tasks[idx].mark();
+                }
             } else if (command.startsWith("unmark ")) {
                 int idx =Integer.parseInt(command.split(" ")[1]) - 1;
-                if (idx >= 0 && idx < count) tasks[idx].unmark();
+
+                if (idx >= 0 && idx < count) {
+                    tasks[idx].unmark();
+                }
             } else {
                 Task t = addTask(command);
                 if (t != null) {
@@ -48,7 +64,7 @@ public class Sqonky {
         System.out.println("Bye. Hope to see you again soon!\n");
     }
 
-    public static Task addTask(String command) {
+    private static Task addTask(String command) {
         if (command.startsWith("todo ")) {
             String desc = command.substring(5);
             return new ToDo(desc);

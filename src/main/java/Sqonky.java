@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
@@ -17,7 +21,7 @@ public class Sqonky {
      * Enum representing valid command types for the application.
      */
     enum CommandType {
-        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, UNKNOWN
+        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, UNKNOWN
     }
 
     /**
@@ -64,6 +68,9 @@ public class Sqonky {
                     handleAddTask(command, tasks);
                     saveTasks(tasks);
                     break;
+                case ON:
+                    listTasksOnDate(command, tasks);
+                    break;
                 default:
                     throw new SqonkyException("What are you saying...\n");
                 }
@@ -92,6 +99,7 @@ public class Sqonky {
         if (command.startsWith("todo")) return CommandType.TODO;
         if (command.startsWith("deadline")) return CommandType.DEADLINE;
         if (command.startsWith("event")) return CommandType.EVENT;
+        if (command.startsWith("on")) return CommandType.ON;
         return CommandType.UNKNOWN;
     }
 
@@ -264,7 +272,15 @@ public class Sqonky {
             // Exception 3: Description and/or date/time empty.
             throw new SqonkyException("Enter a valid description and time.\n");
         }
-        return new Deadline(parts[0], parts[1]);
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+        try {
+            LocalDateTime dateTime = LocalDateTime.parse(parts[1].trim(), inputFormatter);
+            return new Deadline(parts[0], dateTime);
+        } catch (DateTimeParseException e) {
+            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
+        }
     }
 
     /**
@@ -292,7 +308,17 @@ public class Sqonky {
             // Exception 3: Description and/or dates/times empty.
             throw new SqonkyException("Enter a valid description and time.\n");
         }
-        return new Event(parts[0], parts[1], parts[2]);
+
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+
+        try {
+            LocalDateTime fromDate = LocalDateTime.parse(parts[1].trim(), inputFormatter);
+            LocalDateTime toDate = LocalDateTime.parse(parts[2].trim(), inputFormatter);
+
+            return new Event(parts[0].trim(), fromDate, toDate);
+        } catch (DateTimeParseException e) {
+            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
+        }
     }
 
     private static void saveTasks(ArrayList<Task> tasks) {
@@ -332,10 +358,11 @@ public class Sqonky {
                 if (type.equals("T")) {
                     t = new ToDo(desc);
                 } else if (type.equals("D")) {
-                    t = new Deadline(desc, parts[3]);
+                    LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
+                    t = new Deadline(desc, dateTime);
                 } else {
-                    String[] fromTo = parts[3].split("-");
-                    t = new Event(desc, fromTo[0], fromTo[1]);
+                    String[] fromTo = parts[3].split(" to ");
+                    t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
                 }
 
                 if (isDone) {
@@ -346,6 +373,35 @@ public class Sqonky {
             }
         } catch (IOException e) {
             System.out.println("Error loading tasks: " + e.getMessage());
+        }
+    }
+
+    private static void listTasksOnDate(String command, ArrayList<Task> tasks) throws SqonkyException {
+        try {
+            String dateStr = command.substring(3).trim();
+            java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
+
+            System.out.println("Here are the tasks on " + searchDate + ":");
+            int count = 0;
+            for (Task t : tasks) {
+                boolean matches = false;
+                if (t instanceof Deadline) {
+                    matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);
+                } else if (t instanceof Event) {
+                    matches = ((Event) t).getFrom().toLocalDate().equals(searchDate);
+                }
+
+                if (matches) {
+                    count++;
+                    System.out.println(count + "." + t);
+                }
+            }
+            if (count == 0) {
+                System.out.println("No tasks found for this date.");
+            }
+            System.out.println();
+        } catch (Exception e) {
+            throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
         }
     }
 }

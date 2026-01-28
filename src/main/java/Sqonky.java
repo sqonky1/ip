@@ -1,7 +1,3 @@
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
@@ -25,7 +21,7 @@ public class Sqonky {
     /**
      * Enum representing valid command types for the application.
      */
-    enum CommandType {
+    public enum CommandType {
         LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, UNKNOWN
     }
 
@@ -46,7 +42,7 @@ public class Sqonky {
             }
 
             try {
-                CommandType type = getCommandType(command);
+                CommandType type = Parser.parseCommandType(command);
 
                 switch(type) {
                 case LIST:
@@ -62,9 +58,21 @@ public class Sqonky {
                     storage.save(tasks);
                     break;
                 case TODO:
+                    Task t = Parser.parseToDo(command); // Use Parser
+                    tasks.add(t);
+                    ui.showTaskAdded(t, tasks.size());
+                    storage.save(tasks);
+                    break;
                 case DEADLINE:
+                    Task d = Parser.parseDeadline(command); // Use Parser
+                    tasks.add(d);
+                    ui.showTaskAdded(d, tasks.size());
+                    storage.save(tasks);
+                    break;
                 case EVENT:
-                    handleAddTask(command);
+                    Task e = Parser.parseEvent(command); // Use Parser
+                    tasks.add(e);
+                    ui.showTaskAdded(e, tasks.size());
                     storage.save(tasks);
                     break;
                 case ON:
@@ -82,25 +90,6 @@ public class Sqonky {
 
     public static void main(String[] args) {
         new Sqonky("./data/sqonky.txt").run();
-    }
-
-    /**
-     * Maps a raw input string to a specific CommandType.
-     * This isolates string-matching logic to a single location.
-     *
-     * @param command The raw user input string.
-     * @return The corresponding CommandType.
-     */
-    private static CommandType getCommandType(String command) {
-        if (command.equals("list")) return CommandType.LIST;
-        if (command.startsWith("mark")) return CommandType.MARK;
-        if (command.startsWith("unmark")) return CommandType.UNMARK;
-        if (command.startsWith("delete")) return CommandType.DELETE;
-        if (command.startsWith("todo")) return CommandType.TODO;
-        if (command.startsWith("deadline")) return CommandType.DEADLINE;
-        if (command.startsWith("event")) return CommandType.EVENT;
-        if (command.startsWith("on")) return CommandType.ON;
-        return CommandType.UNKNOWN;
     }
 
     private void listTasks() {
@@ -161,125 +150,6 @@ public class Sqonky {
             ui.showTaskRemoved(removed, tasks.size());
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
-        }
-    }
-
-    private void handleAddTask(String command)
-            throws SqonkyException {
-        Task t = addTask(command);
-        tasks.add(t);
-        ui.showTaskAdded(t, tasks.size());
-    }
-
-    /**
-     * Routes the task creation command to the appropriate specific parser.
-     * This method determines if the command is for a ToDo, Deadline, or Event.
-     *
-     * @param command The raw user input string.
-     * @return A Task object (ToDo, Deadline, or Event).
-     * @throws SqonkyException If the command keyword is unrecognized.
-     */
-    private static Task addTask(String command) throws SqonkyException {
-        if (command.startsWith("todo")) {
-            return parseToDo(command);
-        } else if (command.startsWith("deadline")) {
-            return parseDeadline(command);
-        } else if (command.startsWith("event")) {
-            return parseEvent(command);
-        }
-        throw new SqonkyException("What are you saying...\n");
-    }
-
-    /**
-     * Parses the raw input string to create a ToDo task.
-     * Validates that the description is not empty.
-     *
-     * @param command The raw input string starting with "todo".
-     * @return A new ToDo task object.
-     * @throws SqonkyException If the description is missing.
-     */
-    private static ToDo parseToDo(String command) throws SqonkyException {
-        if (command.equals("todo")) {
-            // Exception:Command is just 'todo'.
-            throw new SqonkyException("The description of a todo cannot be empty!\n");
-        }
-        String desc = command.substring(5).trim();
-        if (desc.isEmpty()) {
-            throw new SqonkyException("The description of a todo cannot be empty!\n");
-        }
-        return new ToDo(desc);
-    }
-
-    /**
-     * Parses the raw input string to create a Deadline task.
-     * Validates the presence of the description and the " /by " delimiter.
-     *
-     * @param command The raw input string starting with "deadline".
-     * @return A new Deadline task object.
-     * @throws SqonkyException If the description or deadline time is missing or malformed.
-     */
-    private static Deadline parseDeadline(String command) throws SqonkyException {
-        if (command.equals("deadline")) {
-            // Exception 1: Command is just 'deadline'.
-            throw new SqonkyException("The description of a deadline cannot be empty!\n");
-        }
-
-        if (!command.contains(" /by ")) {
-            // Exception 2: Command does not contain ' /by '.
-            throw new SqonkyException("A deadline must include ' /by ' to specify the date/time!\n");
-        }
-        String[] parts = command.substring(9).split(" /by ", 2);
-
-        if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            // Exception 3: Description and/or date/time empty.
-            throw new SqonkyException("Enter a valid description and time.\n");
-        }
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-
-        try {
-            LocalDateTime dateTime = LocalDateTime.parse(parts[1].trim(), inputFormatter);
-            return new Deadline(parts[0], dateTime);
-        } catch (DateTimeParseException e) {
-            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
-        }
-    }
-
-    /**
-     * Parses the raw input string to create an Event task.
-     * Validates the presence of the description and the " /from " and " /to " delimiters.
-     *
-     * @param command The raw input string starting with "event".
-     * @return A new Event task object.
-     * @throws SqonkyException If the description, start time, or end time is missing or malformed.
-     */
-    private static Event parseEvent(String command) throws SqonkyException {
-        if (command.equals("event")) {
-            // Exception 1: Command is just 'event'.
-            throw new SqonkyException("The description of a event cannot be empty!\n");
-        }
-
-        if (!command.contains(" /from ") || !command.contains(" /to ")) {
-            // Exception 2: Command does not contain both ' /from ' and ' /to '.
-            throw new SqonkyException("An event must include ' /from ' and ' /to ' to specify the dates/times!\n");
-        }
-        String[] parts = command.substring(6).split(" /from | /to ", 3);
-
-        if (parts.length < 3 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()
-                || parts[2].trim().isEmpty()) {
-            // Exception 3: Description and/or dates/times empty.
-            throw new SqonkyException("Enter a valid description and time.\n");
-        }
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-
-        try {
-            LocalDateTime fromDate = LocalDateTime.parse(parts[1].trim(), inputFormatter);
-            LocalDateTime toDate = LocalDateTime.parse(parts[2].trim(), inputFormatter);
-
-            return new Event(parts[0].trim(), fromDate, toDate);
-        } catch (DateTimeParseException e) {
-            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
         }
     }
 

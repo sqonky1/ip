@@ -7,6 +7,13 @@ import java.util.ArrayList;
  */
 public class Sqonky {
     /**
+     * Enum representing valid command types for the application.
+     */
+    enum CommandType {
+        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, UNKNOWN
+    }
+
+    /**
      * Runs the Sqonky command-line application.
      * Continuously reads user input, routes commands to specific handlers,
      * and manages global application state like the task list and count.
@@ -26,16 +33,25 @@ public class Sqonky {
             }
 
             try {
-                if (command.equals("list")) {
+                CommandType type = getCommandType(command);
+
+                switch(type) {
+                case LIST:
                     listTasks(tasks);
-                } else if (command.startsWith("mark") || command.startsWith("unmark")) {
+                    break;
+                case MARK:
+                case UNMARK:
                     markUnmark(command, tasks);
-                } else if (command.startsWith("delete")) {
+                    break;
+                case DELETE:
                     handleDeleteTask(command, tasks);
-                } else if (command.startsWith("todo") || command.startsWith("deadline")
-                        || command.startsWith("event")) {
+                    break;
+                case TODO:
+                case DEADLINE:
+                case EVENT:
                     handleAddTask(command, tasks);
-                } else {
+                    break;
+                default:
                     throw new SqonkyException("What are you saying...\n");
                 }
             } catch (SqonkyException e) {
@@ -46,6 +62,24 @@ public class Sqonky {
         sc.close();
 
         System.out.println("Bye. Hope to see you again soon!");
+    }
+
+    /**
+     * Maps a raw input string to a specific CommandType.
+     * This isolates string-matching logic to a single location.
+     *
+     * @param command The raw user input string.
+     * @return The corresponding CommandType.
+     */
+    private static CommandType getCommandType(String command) {
+        if (command.equals("list")) return CommandType.LIST;
+        if (command.startsWith("mark")) return CommandType.MARK;
+        if (command.startsWith("unmark")) return CommandType.UNMARK;
+        if (command.startsWith("delete")) return CommandType.DELETE;
+        if (command.startsWith("todo")) return CommandType.TODO;
+        if (command.startsWith("deadline")) return CommandType.DEADLINE;
+        if (command.startsWith("event")) return CommandType.EVENT;
+        return CommandType.UNKNOWN;
     }
 
     /**
@@ -125,7 +159,8 @@ public class Sqonky {
 
             System.out.println("Noted. I've removed this task:\n  "
                     + removed + "\n"
-                    + "Now you have " + tasks.size() + " tasks in the list\n");
+                    + "Now you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
+                    + " in the list\n");
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");

@@ -1,6 +1,13 @@
 import java.util.Scanner;
 import java.util.ArrayList;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
@@ -24,6 +31,9 @@ public class Sqonky {
         System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
 
         ArrayList<Task> tasks = new ArrayList<>();
+
+        loadTasks(tasks);
+
         Scanner sc = new Scanner(System.in);
 
         while (true) {
@@ -42,14 +52,17 @@ public class Sqonky {
                 case MARK:
                 case UNMARK:
                     markUnmark(command, tasks);
+                    saveTasks(tasks);
                     break;
                 case DELETE:
                     handleDeleteTask(command, tasks);
+                    saveTasks(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
                     handleAddTask(command, tasks);
+                    saveTasks(tasks);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");
@@ -122,8 +135,10 @@ public class Sqonky {
 
             if (command.startsWith("mark ")) {
                 tasks.get(idx).mark();
+                System.out.println("Nice! I've marked this task as done:\n" + tasks.get(idx) + "\n");
             } else {
                 tasks.get(idx).unmark();
+                System.out.println("OK, I've marked this task as not done yet:\n" + tasks.get(idx) + "\n");
             }
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -280,4 +295,57 @@ public class Sqonky {
         return new Event(parts[0], parts[1], parts[2]);
     }
 
+    private static void saveTasks(ArrayList<Task> tasks) {
+        try {
+            Files.createDirectories(Paths.get("./data"));
+
+            FileWriter fw = new FileWriter("./data/sqonky.txt");
+
+            for (Task t : tasks) {
+                fw.write(t.toSaveFormat() + System.lineSeparator());
+            }
+
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("Something went wrong while saving: " + e.getMessage());
+        }
+    }
+
+    private static void loadTasks(ArrayList<Task> tasks) {
+        File f = new File("./data/sqonky.txt");
+
+        if (!f.exists()) {
+            return;
+        }
+
+        try {
+            Scanner s = new Scanner(f);
+            while (s.hasNext()) {
+                String line = s.nextLine();
+                String[] parts = line.split(" \\| ");
+
+                String type = parts[0];
+                boolean isDone = parts[1].equals("1");
+                String desc = parts[2];
+
+                Task t;
+                if (type.equals("T")) {
+                    t = new ToDo(desc);
+                } else if (type.equals("D")) {
+                    t = new Deadline(desc, parts[3]);
+                } else {
+                    String[] fromTo = parts[3].split("-");
+                    t = new Event(desc, fromTo[0], fromTo[1]);
+                }
+
+                if (isDone) {
+                    t.mark();
+                }
+
+                tasks.add(t);
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading tasks: " + e.getMessage());
+        }
+    }
 }

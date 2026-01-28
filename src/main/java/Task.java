@@ -10,18 +10,20 @@ public class Task {
         this.isDone = false;
     }
 
-    public String getStatusIcon() {
+    private String getStatusIcon() {
         return (isDone ? "X" : " ");
     }
 
     public void mark() {
         this.isDone = true;
-        System.out.println("Nice! I've marked this task as done:\n" + this + "\n");
     }
 
     public void unmark() {
         this.isDone = false;
-        System.out.println("OK, I've marked this task as not done yet:\n" + this + "\n");
+    }
+
+    public String toSaveFormat() {
+        return (isDone ? "1" : "0") + " | " + description;
     }
 
     @Override

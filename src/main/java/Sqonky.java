@@ -1,13 +1,3 @@
-import java.util.Scanner;
-import java.util.ArrayList;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -17,9 +7,9 @@ import java.time.format.DateTimeParseException;
  * Handles user input and manages the task list.
  */
 public class Sqonky {
-    private Storage storage;
-    private ArrayList<Task> tasks;
-    private Ui ui;
+    private final Storage storage;
+    private TaskList tasks;
+    private final Ui ui;
 
     public Sqonky(String filePath) {
         storage = new Storage(filePath);
@@ -28,7 +18,7 @@ public class Sqonky {
             tasks = storage.load();
         } catch (SqonkyException e) {
             ui.showLoadingError();
-            tasks = new ArrayList<>();
+            tasks = new TaskList();
         }
     }
 
@@ -60,25 +50,25 @@ public class Sqonky {
 
                 switch(type) {
                 case LIST:
-                    listTasks(tasks);
+                    listTasks();
                     break;
                 case MARK:
                 case UNMARK:
-                    markUnmark(command, tasks);
+                    markUnmark(command);
                     storage.save(tasks);
                     break;
                 case DELETE:
-                    handleDeleteTask(command, tasks);
+                    handleDeleteTask(command);
                     storage.save(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
-                    handleAddTask(command, tasks);
+                    handleAddTask(command);
                     storage.save(tasks);
                     break;
                 case ON:
-                    listTasksOnDate(command, tasks);
+                    listTasksOnDate(command);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");
@@ -113,12 +103,7 @@ public class Sqonky {
         return CommandType.UNKNOWN;
     }
 
-    /**
-     * Displays all tasks currently stored in the task list to the console.
-     *
-     * @param tasks The ArrayList of Task objects to be printed.
-     */
-    private void listTasks(ArrayList<Task> tasks) {
+    private void listTasks() {
         ui.showListHeader();
         for (int i = 0; i < tasks.size(); i++) {
             int num = i + 1;
@@ -127,15 +112,7 @@ public class Sqonky {
         ui.showEmptyLine();
     }
 
-    /**
-     * Handles the logic for marking tasks as done or not done.
-     * Validates the task index and updates the status of the task in the collection.
-     *
-     * @param command The raw user input string (which starts with mark or unmark).
-     * @param tasks   The ArrayList containing the Task objects.
-     * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
-     */
-    private void markUnmark(String command, ArrayList<Task> tasks)
+    private void markUnmark(String command)
             throws SqonkyException {
         if (command.equals("mark") || command.equals("unmark")) {
             // Exception 1: Task number not provided
@@ -151,12 +128,13 @@ public class Sqonky {
                         + ". You have " + tasks.size() + " tasks.\n");
             }
 
+            Task t = tasks.get(idx);
             if (command.startsWith("mark ")) {
-                tasks.get(idx).mark();
-                ui.showMarked(tasks.get(idx));
+                t.mark();
+                ui.showMarked(t);
             } else {
-                tasks.get(idx).unmark();
-                ui.showUnmarked(tasks.get(idx));
+                t.unmark();
+                ui.showUnmarked(t);
             }
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -164,16 +142,7 @@ public class Sqonky {
         }
     }
 
-    /**
-     * Handles the logic for deleting a task from the list.
-     * Validates the task index, removes the task from the collection, and
-     * provides feedback to the user.
-     *
-     * @param command The raw user input string (starting with delete).
-     * @param tasks   The ArrayList containing the Task objects.
-     * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
-     */
-    private void handleDeleteTask(String command, ArrayList<Task> tasks)
+    private void handleDeleteTask(String command)
             throws SqonkyException {
         if (command.equals("delete")) {
             // Exception 1: Task number not provided
@@ -188,25 +157,14 @@ public class Sqonky {
                         + ". You have " + tasks.size() + " tasks.\n");
             }
 
-            Task removed = tasks.remove(idx);
-
+            Task removed = tasks.delete(idx);
             ui.showTaskRemoved(removed, tasks.size());
-
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
         }
     }
 
-    /**
-     * Manages the high-level flow of adding a task to the list.
-     * It coordinates parsing the command into a Task object, adding it to the
-     * collection, and providing feedback to the user.
-     *
-     * @param command The raw user input string for creating a task.
-     * @param tasks   The ArrayList where the new task will be stored.
-     * @throws SqonkyException If the task creation fails due to invalid input.
-     */
-    private void handleAddTask(String command, ArrayList<Task> tasks)
+    private void handleAddTask(String command)
             throws SqonkyException {
         Task t = addTask(command);
         tasks.add(t);
@@ -325,14 +283,15 @@ public class Sqonky {
         }
     }
 
-    private void listTasksOnDate(String command, ArrayList<Task> tasks) throws SqonkyException {
+    private void listTasksOnDate(String command) throws SqonkyException {
         try {
             String dateStr = command.substring(3).trim();
             java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
-
             ui.showDateSearchHeader(searchDate);
+
             int count = 0;
-            for (Task t : tasks) {
+            for (int i = 0; i < tasks.size(); i++) {
+                Task t = tasks.get(i);
                 boolean matches = false;
                 if (t instanceof Deadline) {
                     matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);

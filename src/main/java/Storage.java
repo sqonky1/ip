@@ -3,7 +3,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.time.LocalDateTime;
 
@@ -14,8 +13,8 @@ public class Storage {
         this.filePath = filePath;
     }
 
-    public ArrayList<Task> load() throws SqonkyException {
-        ArrayList<Task> tasks = new ArrayList<>();
+    public TaskList load() throws SqonkyException {
+        TaskList tasks = new TaskList();
         File f = new File(filePath);
 
         if (!f.exists()) {
@@ -57,11 +56,12 @@ public class Storage {
         return tasks;
     }
 
-    public void save(ArrayList<Task> tasks) throws SqonkyException {
+    public void save(TaskList tasks) throws SqonkyException {
         try {
             Files.createDirectories(Paths.get(new File(filePath).getParent()));
             FileWriter fw = new FileWriter(filePath);
-            for (Task t : tasks) {
+
+            for (Task t : tasks.getAllTasks()) {
                 fw.write(t.toSaveFormat() + System.lineSeparator());
             }
             fw.close();

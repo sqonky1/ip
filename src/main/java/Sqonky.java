@@ -1,26 +1,27 @@
-import java.util.Scanner;
-import java.util.ArrayList;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-
 /**
  * Main application class for Sqonky.
  * Handles user input and manages the task list.
  */
 public class Sqonky {
+    private final Storage storage;
+    private TaskList tasks;
+    private final Ui ui;
+
+    public Sqonky(String filePath) {
+        storage = new Storage(filePath);
+        ui = new Ui();
+        try {
+            tasks = storage.load();
+        } catch (SqonkyException e) {
+            ui.showLoadingError();
+            tasks = new TaskList();
+        }
+    }
+
     /**
      * Enum representing valid command types for the application.
      */
-    enum CommandType {
+    public enum CommandType {
         LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, UNKNOWN
     }
 
@@ -28,104 +29,79 @@ public class Sqonky {
      * Runs the Sqonky command-line application.
      * Continuously reads user input, routes commands to specific handlers,
      * and manages global application state like the task list and count.
-     *
-     * @param args Command-line arguments (not used).
      */
-    public static void main(String[] args) {
-        System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
+    public void run() {
+        ui.showWelcome();
+        boolean isExit = false;
 
-        ArrayList<Task> tasks = new ArrayList<>();
-
-        loadTasks(tasks);
-
-        Scanner sc = new Scanner(System.in);
-
-        while (true) {
-            String command = sc.nextLine();
+        while (!isExit) {
+            String command = ui.readCommand();
             if (command.equals("bye")) {
-                break;
+                isExit = true;
+                continue;
             }
 
             try {
-                CommandType type = getCommandType(command);
+                CommandType type = Parser.parseCommandType(command);
 
                 switch(type) {
                 case LIST:
-                    listTasks(tasks);
+                    listTasks();
                     break;
                 case MARK:
                 case UNMARK:
-                    markUnmark(command, tasks);
-                    saveTasks(tasks);
+                    markUnmark(command);
+                    storage.save(tasks);
                     break;
                 case DELETE:
-                    handleDeleteTask(command, tasks);
-                    saveTasks(tasks);
+                    handleDeleteTask(command);
+                    storage.save(tasks);
                     break;
                 case TODO:
+                    Task t = Parser.parseToDo(command); // Use Parser
+                    tasks.add(t);
+                    ui.showTaskAdded(t, tasks.size());
+                    storage.save(tasks);
+                    break;
                 case DEADLINE:
+                    Task d = Parser.parseDeadline(command); // Use Parser
+                    tasks.add(d);
+                    ui.showTaskAdded(d, tasks.size());
+                    storage.save(tasks);
+                    break;
                 case EVENT:
-                    handleAddTask(command, tasks);
-                    saveTasks(tasks);
+                    Task e = Parser.parseEvent(command); // Use Parser
+                    tasks.add(e);
+                    ui.showTaskAdded(e, tasks.size());
+                    storage.save(tasks);
                     break;
                 case ON:
-                    listTasksOnDate(command, tasks);
+                    listTasksOnDate(command);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");
                 }
             } catch (SqonkyException e) {
-                System.out.println(e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
-
-        sc.close();
-
-        System.out.println("Bye. Hope to see you again soon!");
+        ui.showGoodbye();
     }
 
-    /**
-     * Maps a raw input string to a specific CommandType.
-     * This isolates string-matching logic to a single location.
-     *
-     * @param command The raw user input string.
-     * @return The corresponding CommandType.
-     */
-    private static CommandType getCommandType(String command) {
-        if (command.equals("list")) return CommandType.LIST;
-        if (command.startsWith("mark")) return CommandType.MARK;
-        if (command.startsWith("unmark")) return CommandType.UNMARK;
-        if (command.startsWith("delete")) return CommandType.DELETE;
-        if (command.startsWith("todo")) return CommandType.TODO;
-        if (command.startsWith("deadline")) return CommandType.DEADLINE;
-        if (command.startsWith("event")) return CommandType.EVENT;
-        if (command.startsWith("on")) return CommandType.ON;
-        return CommandType.UNKNOWN;
+    public static void main(String[] args) {
+        new Sqonky("./data/sqonky.txt").run();
     }
 
-    /**
-     * Displays all tasks currently stored in the task list to the console.
-     *
-     * @param tasks The ArrayList of Task objects to be printed.
-     */
-    private static void listTasks(ArrayList<Task> tasks) {
-        System.out.println("Here are the tasks in your list:");
+    private void listTasks() {
+        ui.showListHeader();
         for (int i = 0; i < tasks.size(); i++) {
             int num = i + 1;
-            System.out.println(num + "." + tasks.get(i));
+            ui.showTaskItem(num, tasks.get(i));
         }
-        System.out.println();
+        ui.showEmptyLine();
     }
 
-    /**
-     * Handles the logic for marking tasks as done or not done.
-     * Validates the task index and updates the status of the task in the collection.
-     *
-     * @param command The raw user input string (which starts with mark or unmark).
-     * @param tasks   The ArrayList containing the Task objects.
-     * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
-     */
-    private static void markUnmark(String command, ArrayList<Task> tasks)
+    private void markUnmark(String command)
             throws SqonkyException {
         if (command.equals("mark") || command.equals("unmark")) {
             // Exception 1: Task number not provided
@@ -141,12 +117,13 @@ public class Sqonky {
                         + ". You have " + tasks.size() + " tasks.\n");
             }
 
+            Task t = tasks.get(idx);
             if (command.startsWith("mark ")) {
-                tasks.get(idx).mark();
-                System.out.println("Nice! I've marked this task as done:\n" + tasks.get(idx) + "\n");
+                t.mark();
+                ui.showMarked(t);
             } else {
-                tasks.get(idx).unmark();
-                System.out.println("OK, I've marked this task as not done yet:\n" + tasks.get(idx) + "\n");
+                t.unmark();
+                ui.showUnmarked(t);
             }
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -154,16 +131,7 @@ public class Sqonky {
         }
     }
 
-    /**
-     * Handles the logic for deleting a task from the list.
-     * Validates the task index, removes the task from the collection, and
-     * provides feedback to the user.
-     *
-     * @param command The raw user input string (starting with delete).
-     * @param tasks   The ArrayList containing the Task objects.
-     * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
-     */
-    private static void handleDeleteTask(String command, ArrayList<Task> tasks)
+    private void handleDeleteTask(String command)
             throws SqonkyException {
         if (command.equals("delete")) {
             // Exception 1: Task number not provided
@@ -178,212 +146,22 @@ public class Sqonky {
                         + ". You have " + tasks.size() + " tasks.\n");
             }
 
-            Task removed = tasks.remove(idx);
-
-            System.out.println("Noted. I've removed this task:\n  "
-                    + removed + "\n"
-                    + "Now you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
-                    + " in the list\n");
-
+            Task removed = tasks.delete(idx);
+            ui.showTaskRemoved(removed, tasks.size());
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
         }
     }
 
-    /**
-     * Manages the high-level flow of adding a task to the list.
-     * It coordinates parsing the command into a Task object, adding it to the
-     * collection, and providing feedback to the user.
-     *
-     * @param command The raw user input string for creating a task.
-     * @param tasks   The ArrayList where the new task will be stored.
-     * @throws SqonkyException If the task creation fails due to invalid input.
-     */
-    private static void handleAddTask(String command, ArrayList<Task> tasks)
-            throws SqonkyException {
-        Task t = addTask(command);
-        tasks.add(t);
-        System.out.println("Got it. I've added this task:\n  "
-                + t
-                + "\nNow you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
-                + " in the list.\n");
-    }
-
-    /**
-     * Routes the task creation command to the appropriate specific parser.
-     * This method determines if the command is for a ToDo, Deadline, or Event.
-     *
-     * @param command The raw user input string.
-     * @return A Task object (ToDo, Deadline, or Event).
-     * @throws SqonkyException If the command keyword is unrecognized.
-     */
-    private static Task addTask(String command) throws SqonkyException {
-        if (command.startsWith("todo")) {
-            return parseToDo(command);
-        } else if (command.startsWith("deadline")) {
-            return parseDeadline(command);
-        } else if (command.startsWith("event")) {
-            return parseEvent(command);
-        }
-        throw new SqonkyException("What are you saying...\n");
-    }
-
-    /**
-     * Parses the raw input string to create a ToDo task.
-     * Validates that the description is not empty.
-     *
-     * @param command The raw input string starting with "todo".
-     * @return A new ToDo task object.
-     * @throws SqonkyException If the description is missing.
-     */
-    private static ToDo parseToDo(String command) throws SqonkyException {
-        if (command.equals("todo")) {
-            // Exception:Command is just 'todo'.
-            throw new SqonkyException("The description of a todo cannot be empty!\n");
-        }
-        String desc = command.substring(5).trim();
-        if (desc.isEmpty()) {
-            throw new SqonkyException("The description of a todo cannot be empty!\n");
-        }
-        return new ToDo(desc);
-    }
-
-    /**
-     * Parses the raw input string to create a Deadline task.
-     * Validates the presence of the description and the " /by " delimiter.
-     *
-     * @param command The raw input string starting with "deadline".
-     * @return A new Deadline task object.
-     * @throws SqonkyException If the description or deadline time is missing or malformed.
-     */
-    private static Deadline parseDeadline(String command) throws SqonkyException {
-        if (command.equals("deadline")) {
-            // Exception 1: Command is just 'deadline'.
-            throw new SqonkyException("The description of a deadline cannot be empty!\n");
-        }
-
-        if (!command.contains(" /by ")) {
-            // Exception 2: Command does not contain ' /by '.
-            throw new SqonkyException("A deadline must include ' /by ' to specify the date/time!\n");
-        }
-        String[] parts = command.substring(9).split(" /by ", 2);
-
-        if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            // Exception 3: Description and/or date/time empty.
-            throw new SqonkyException("Enter a valid description and time.\n");
-        }
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-
-        try {
-            LocalDateTime dateTime = LocalDateTime.parse(parts[1].trim(), inputFormatter);
-            return new Deadline(parts[0], dateTime);
-        } catch (DateTimeParseException e) {
-            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
-        }
-    }
-
-    /**
-     * Parses the raw input string to create an Event task.
-     * Validates the presence of the description and the " /from " and " /to " delimiters.
-     *
-     * @param command The raw input string starting with "event".
-     * @return A new Event task object.
-     * @throws SqonkyException If the description, start time, or end time is missing or malformed.
-     */
-    private static Event parseEvent(String command) throws SqonkyException {
-        if (command.equals("event")) {
-            // Exception 1: Command is just 'event'.
-            throw new SqonkyException("The description of a event cannot be empty!\n");
-        }
-
-        if (!command.contains(" /from ") || !command.contains(" /to ")) {
-            // Exception 2: Command does not contain both ' /from ' and ' /to '.
-            throw new SqonkyException("An event must include ' /from ' and ' /to ' to specify the dates/times!\n");
-        }
-        String[] parts = command.substring(6).split(" /from | /to ", 3);
-
-        if (parts.length < 3 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()
-                || parts[2].trim().isEmpty()) {
-            // Exception 3: Description and/or dates/times empty.
-            throw new SqonkyException("Enter a valid description and time.\n");
-        }
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-
-        try {
-            LocalDateTime fromDate = LocalDateTime.parse(parts[1].trim(), inputFormatter);
-            LocalDateTime toDate = LocalDateTime.parse(parts[2].trim(), inputFormatter);
-
-            return new Event(parts[0].trim(), fromDate, toDate);
-        } catch (DateTimeParseException e) {
-            throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
-        }
-    }
-
-    private static void saveTasks(ArrayList<Task> tasks) {
-        try {
-            Files.createDirectories(Paths.get("./data"));
-
-            FileWriter fw = new FileWriter("./data/sqonky.txt");
-
-            for (Task t : tasks) {
-                fw.write(t.toSaveFormat() + System.lineSeparator());
-            }
-
-            fw.close();
-        } catch (IOException e) {
-            System.out.println("Something went wrong while saving: " + e.getMessage());
-        }
-    }
-
-    private static void loadTasks(ArrayList<Task> tasks) {
-        File f = new File("./data/sqonky.txt");
-
-        if (!f.exists()) {
-            return;
-        }
-
-        try {
-            Scanner s = new Scanner(f);
-            while (s.hasNext()) {
-                String line = s.nextLine();
-                String[] parts = line.split(" \\| ");
-
-                String type = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String desc = parts[2];
-
-                Task t;
-                if (type.equals("T")) {
-                    t = new ToDo(desc);
-                } else if (type.equals("D")) {
-                    LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
-                    t = new Deadline(desc, dateTime);
-                } else {
-                    String[] fromTo = parts[3].split(" to ");
-                    t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
-                }
-
-                if (isDone) {
-                    t.mark();
-                }
-
-                tasks.add(t);
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading tasks: " + e.getMessage());
-        }
-    }
-
-    private static void listTasksOnDate(String command, ArrayList<Task> tasks) throws SqonkyException {
+    private void listTasksOnDate(String command) throws SqonkyException {
         try {
             String dateStr = command.substring(3).trim();
             java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
+            ui.showDateSearchHeader(searchDate);
 
-            System.out.println("Here are the tasks on " + searchDate + ":");
             int count = 0;
-            for (Task t : tasks) {
+            for (int i = 0; i < tasks.size(); i++) {
+                Task t = tasks.get(i);
                 boolean matches = false;
                 if (t instanceof Deadline) {
                     matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);
@@ -393,13 +171,13 @@ public class Sqonky {
 
                 if (matches) {
                     count++;
-                    System.out.println(count + "." + t);
+                    ui.showTaskItem(count, t);
                 }
             }
             if (count == 0) {
-                System.out.println("No tasks found for this date.");
+                ui.showNoTasksOnDate();
             }
-            System.out.println();
+            ui.showEmptyLine();
         } catch (Exception e) {
             throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
         }

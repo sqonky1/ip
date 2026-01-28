@@ -19,13 +19,15 @@ import java.time.format.DateTimeParseException;
 public class Sqonky {
     private Storage storage;
     private ArrayList<Task> tasks;
+    private Ui ui;
 
     public Sqonky(String filePath) {
         storage = new Storage(filePath);
+        ui = new Ui();
         try {
             tasks = storage.load();
         } catch (SqonkyException e) {
-            System.out.println("Error loading tasks: " + e.getMessage());
+            ui.showLoadingError();
             tasks = new ArrayList<>();
         }
     }
@@ -43,13 +45,14 @@ public class Sqonky {
      * and manages global application state like the task list and count.
      */
     public void run() {
-        System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
-        Scanner sc = new Scanner(System.in);
+        ui.showWelcome();
+        boolean isExit = false;
 
-        while (true) {
-            String command = sc.nextLine();
+        while (!isExit) {
+            String command = ui.readCommand();
             if (command.equals("bye")) {
-                break;
+                isExit = true;
+                continue;
             }
 
             try {
@@ -81,13 +84,10 @@ public class Sqonky {
                     throw new SqonkyException("What are you saying...\n");
                 }
             } catch (SqonkyException e) {
-                System.out.println(e.getMessage());
+                ui.showError(e.getMessage());
             }
         }
-
-        sc.close();
-
-        System.out.println("Bye. Hope to see you again soon!");
+        ui.showGoodbye();
     }
 
     public static void main(String[] args) {
@@ -118,13 +118,13 @@ public class Sqonky {
      *
      * @param tasks The ArrayList of Task objects to be printed.
      */
-    private static void listTasks(ArrayList<Task> tasks) {
-        System.out.println("Here are the tasks in your list:");
+    private void listTasks(ArrayList<Task> tasks) {
+        ui.showListHeader();
         for (int i = 0; i < tasks.size(); i++) {
             int num = i + 1;
-            System.out.println(num + "." + tasks.get(i));
+            ui.showTaskItem(num, tasks.get(i));
         }
-        System.out.println();
+        ui.showEmptyLine();
     }
 
     /**
@@ -135,7 +135,7 @@ public class Sqonky {
      * @param tasks   The ArrayList containing the Task objects.
      * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
      */
-    private static void markUnmark(String command, ArrayList<Task> tasks)
+    private void markUnmark(String command, ArrayList<Task> tasks)
             throws SqonkyException {
         if (command.equals("mark") || command.equals("unmark")) {
             // Exception 1: Task number not provided
@@ -153,10 +153,10 @@ public class Sqonky {
 
             if (command.startsWith("mark ")) {
                 tasks.get(idx).mark();
-                System.out.println("Nice! I've marked this task as done:\n" + tasks.get(idx) + "\n");
+                ui.showMarked(tasks.get(idx));
             } else {
                 tasks.get(idx).unmark();
-                System.out.println("OK, I've marked this task as not done yet:\n" + tasks.get(idx) + "\n");
+                ui.showUnmarked(tasks.get(idx));
             }
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
@@ -173,7 +173,7 @@ public class Sqonky {
      * @param tasks   The ArrayList containing the Task objects.
      * @throws SqonkyException If the task number is missing, non-numeric, or out of bounds.
      */
-    private static void handleDeleteTask(String command, ArrayList<Task> tasks)
+    private void handleDeleteTask(String command, ArrayList<Task> tasks)
             throws SqonkyException {
         if (command.equals("delete")) {
             // Exception 1: Task number not provided
@@ -190,10 +190,7 @@ public class Sqonky {
 
             Task removed = tasks.remove(idx);
 
-            System.out.println("Noted. I've removed this task:\n  "
-                    + removed + "\n"
-                    + "Now you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
-                    + " in the list\n");
+            ui.showTaskRemoved(removed, tasks.size());
 
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
@@ -209,14 +206,11 @@ public class Sqonky {
      * @param tasks   The ArrayList where the new task will be stored.
      * @throws SqonkyException If the task creation fails due to invalid input.
      */
-    private static void handleAddTask(String command, ArrayList<Task> tasks)
+    private void handleAddTask(String command, ArrayList<Task> tasks)
             throws SqonkyException {
         Task t = addTask(command);
         tasks.add(t);
-        System.out.println("Got it. I've added this task:\n  "
-                + t
-                + "\nNow you have " + tasks.size() + " " + (tasks.size() == 1 ? "task" : "tasks")
-                + " in the list.\n");
+        ui.showTaskAdded(t, tasks.size());
     }
 
     /**
@@ -331,12 +325,12 @@ public class Sqonky {
         }
     }
 
-    private static void listTasksOnDate(String command, ArrayList<Task> tasks) throws SqonkyException {
+    private void listTasksOnDate(String command, ArrayList<Task> tasks) throws SqonkyException {
         try {
             String dateStr = command.substring(3).trim();
             java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
 
-            System.out.println("Here are the tasks on " + searchDate + ":");
+            ui.showDateSearchHeader(searchDate);
             int count = 0;
             for (Task t : tasks) {
                 boolean matches = false;
@@ -348,13 +342,13 @@ public class Sqonky {
 
                 if (matches) {
                     count++;
-                    System.out.println(count + "." + t);
+                    ui.showTaskItem(count, t);
                 }
             }
             if (count == 0) {
-                System.out.println("No tasks found for this date.");
+                ui.showNoTasksOnDate();
             }
-            System.out.println();
+            ui.showEmptyLine();
         } catch (Exception e) {
             throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
         }

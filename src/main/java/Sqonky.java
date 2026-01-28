@@ -17,6 +17,19 @@ import java.time.format.DateTimeParseException;
  * Handles user input and manages the task list.
  */
 public class Sqonky {
+    private Storage storage;
+    private ArrayList<Task> tasks;
+
+    public Sqonky(String filePath) {
+        storage = new Storage(filePath);
+        try {
+            tasks = storage.load();
+        } catch (SqonkyException e) {
+            System.out.println("Error loading tasks: " + e.getMessage());
+            tasks = new ArrayList<>();
+        }
+    }
+
     /**
      * Enum representing valid command types for the application.
      */
@@ -28,16 +41,9 @@ public class Sqonky {
      * Runs the Sqonky command-line application.
      * Continuously reads user input, routes commands to specific handlers,
      * and manages global application state like the task list and count.
-     *
-     * @param args Command-line arguments (not used).
      */
-    public static void main(String[] args) {
+    public void run() {
         System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
-
-        ArrayList<Task> tasks = new ArrayList<>();
-
-        loadTasks(tasks);
-
         Scanner sc = new Scanner(System.in);
 
         while (true) {
@@ -56,17 +62,17 @@ public class Sqonky {
                 case MARK:
                 case UNMARK:
                     markUnmark(command, tasks);
-                    saveTasks(tasks);
+                    storage.save(tasks);
                     break;
                 case DELETE:
                     handleDeleteTask(command, tasks);
-                    saveTasks(tasks);
+                    storage.save(tasks);
                     break;
                 case TODO:
                 case DEADLINE:
                 case EVENT:
                     handleAddTask(command, tasks);
-                    saveTasks(tasks);
+                    storage.save(tasks);
                     break;
                 case ON:
                     listTasksOnDate(command, tasks);
@@ -82,6 +88,10 @@ public class Sqonky {
         sc.close();
 
         System.out.println("Bye. Hope to see you again soon!");
+    }
+
+    public static void main(String[] args) {
+        new Sqonky("./data/sqonky.txt").run();
     }
 
     /**
@@ -318,61 +328,6 @@ public class Sqonky {
             return new Event(parts[0].trim(), fromDate, toDate);
         } catch (DateTimeParseException e) {
             throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
-        }
-    }
-
-    private static void saveTasks(ArrayList<Task> tasks) {
-        try {
-            Files.createDirectories(Paths.get("./data"));
-
-            FileWriter fw = new FileWriter("./data/sqonky.txt");
-
-            for (Task t : tasks) {
-                fw.write(t.toSaveFormat() + System.lineSeparator());
-            }
-
-            fw.close();
-        } catch (IOException e) {
-            System.out.println("Something went wrong while saving: " + e.getMessage());
-        }
-    }
-
-    private static void loadTasks(ArrayList<Task> tasks) {
-        File f = new File("./data/sqonky.txt");
-
-        if (!f.exists()) {
-            return;
-        }
-
-        try {
-            Scanner s = new Scanner(f);
-            while (s.hasNext()) {
-                String line = s.nextLine();
-                String[] parts = line.split(" \\| ");
-
-                String type = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String desc = parts[2];
-
-                Task t;
-                if (type.equals("T")) {
-                    t = new ToDo(desc);
-                } else if (type.equals("D")) {
-                    LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
-                    t = new Deadline(desc, dateTime);
-                } else {
-                    String[] fromTo = parts[3].split(" to ");
-                    t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
-                }
-
-                if (isDone) {
-                    t.mark();
-                }
-
-                tasks.add(t);
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading tasks: " + e.getMessage());
         }
     }
 

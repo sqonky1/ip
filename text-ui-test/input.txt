@@ -4,17 +4,17 @@ mark 1
 list
 unmark 1
 list
-deadline return book /by Sunday
-event project meeting /from Mon 2pm /to 4pm
+deadline return book /by 2026-06-06 1800
+event project meeting /from 2026-08-06 1400 /to 2026-08-07 1600
 list
 todo
 todo
 deadline
 deadline return book
-deadline /by Sunday
+deadline /by 2026-06-06 1800
 event
-event project meeting /from Mon 2pm
-event /from Mon 2pm /to 4pm
+event project meeting /from 2026-08-06 1400
+event /from 2026-08-06 1400 /to 2026-08-07 1600
 mark
 mark 100
 mark abc

@@ -21,17 +21,17 @@ Here are the tasks in your list:
 1.[T][ ] borrow book
 
 Got it. I've added this task:
-  [D][ ] return book (by: Sunday)
+  [D][ ] return book (by: Jun 6 2026, 6:00 pm)
 Now you have 2 tasks in the list.
 
 Got it. I've added this task:
-  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+  [E][ ] project meeting (from: Aug 6 2026, 2:00 pm to: Aug 7 2026, 4:00 pm)
 Now you have 3 tasks in the list.
 
 Here are the tasks in your list:
 1.[T][ ] borrow book
-2.[D][ ] return book (by: Sunday)
-3.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+2.[D][ ] return book (by: Jun 6 2026, 6:00 pm)
+3.[E][ ] project meeting (from: Aug 6 2026, 2:00 pm to: Aug 7 2026, 4:00 pm)
 
 The description of a todo cannot be empty!
 
@@ -60,19 +60,19 @@ I can't find task 0. You have 3 tasks.
 What are you saying...
 
 Noted. I've removed this task:
-  [D][ ] return book (by: Sunday)
+  [D][ ] return book (by: Jun 6 2026, 6:00 pm)
 Now you have 2 tasks in the list
 
 Here are the tasks in your list:
 1.[T][ ] borrow book
-2.[E][ ] project meeting (from: Mon 2pm to: 4pm)
+2.[E][ ] project meeting (from: Aug 6 2026, 2:00 pm to: Aug 7 2026, 4:00 pm)
 
 Noted. I've removed this task:
   [T][ ] borrow book
 Now you have 1 task in the list
 
 Noted. I've removed this task:
-  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+  [E][ ] project meeting (from: Aug 6 2026, 2:00 pm to: Aug 7 2026, 4:00 pm)
 Now you have 0 tasks in the list
 
 Here are the tasks in your list:

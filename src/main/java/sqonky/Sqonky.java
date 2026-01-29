@@ -75,7 +75,7 @@ public class Sqonky {
             try {
                 CommandType type = Parser.parseCommandType(command);
 
-                switch(type) {
+                switch (type) {
                 case LIST:
                     tasks.listTasks(ui);
                     break;

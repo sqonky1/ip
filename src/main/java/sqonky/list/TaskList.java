@@ -101,12 +101,14 @@ public class TaskList {
      */
     public void markUnmarkTask(String command, Ui ui) throws SqonkyException {
         String[] parts = command.split(" ");
+
         if (parts.length < 2) {
             throw new SqonkyException("Please provide a task number.\n");
         }
         try {
             int idx = Integer.parseInt(parts[1]) - 1;
             validateIndex(idx);
+
             Task t = tasks.get(idx);
             if (command.startsWith("mark")) {
                 t.mark();

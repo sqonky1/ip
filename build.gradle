@@ -32,10 +32,18 @@ application {
 }
 
 shadowJar {
-    archiveBaseName = "duke"
+    archiveBaseName = "sqonky"
     archiveClassifier = null
 }
 
-run{
+run {
     standardInput = System.in
+}
+
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'sqonky.Sqonky'
+        )
+    }
 }

@@ -49,12 +49,14 @@ public class TaskList {
 
     public void markUnmarkTask(String command, Ui ui) throws SqonkyException {
         String[] parts = command.split(" ");
+
         if (parts.length < 2) {
             throw new SqonkyException("Please provide a task number.\n");
         }
         try {
             int idx = Integer.parseInt(parts[1]) - 1;
             validateIndex(idx);
+
             Task t = tasks.get(idx);
             if (command.startsWith("mark")) {
                 t.mark();
@@ -96,8 +98,7 @@ public class TaskList {
             ui.showDateSearchHeader(searchDate);
 
             int count = 0;
-            for (int i = 0; i < tasks.size(); i++) {
-                Task t = tasks.get(i);
+            for (Task t : tasks) {
                 boolean matches = false;
                 if (t instanceof Deadline) {
                     matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);

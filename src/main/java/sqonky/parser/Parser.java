@@ -13,14 +13,31 @@ import java.time.format.DateTimeParseException;
 public class Parser {
 
     public static Sqonky.CommandType parseCommandType(String command) {
-        if (command.equals("list")) return Sqonky.CommandType.LIST;
-        if (command.startsWith("mark")) return Sqonky.CommandType.MARK;
-        if (command.startsWith("unmark")) return Sqonky.CommandType.UNMARK;
-        if (command.startsWith("delete")) return Sqonky.CommandType.DELETE;
-        if (command.startsWith("todo")) return Sqonky.CommandType.TODO;
-        if (command.startsWith("deadline")) return Sqonky.CommandType.DEADLINE;
-        if (command.startsWith("event")) return Sqonky.CommandType.EVENT;
-        if (command.startsWith("on")) return Sqonky.CommandType.ON;
+        if (command.equals("list")) {
+            return Sqonky.CommandType.LIST;
+        }
+        if (command.startsWith("mark")) {
+            return Sqonky.CommandType.MARK;
+        }
+        if (command.startsWith("unmark")) {
+            return Sqonky.CommandType.UNMARK;
+        }
+        if (command.startsWith("delete")) {
+            return Sqonky.CommandType.DELETE;
+        }
+        if (command.startsWith("todo")) {
+            return Sqonky.CommandType.TODO;
+        }
+        if (command.startsWith("deadline")) {
+            return Sqonky.CommandType.DEADLINE;
+        }
+        if (command.startsWith("event")) {
+            return Sqonky.CommandType.EVENT;
+        }
+        if (command.startsWith("on")) {
+            return Sqonky.CommandType.ON;
+        }
+
         return Sqonky.CommandType.UNKNOWN;
     }
 

@@ -32,28 +32,10 @@ public class Storage {
 
         try {
             Scanner s = new Scanner(f);
+            
             while (s.hasNext()) {
                 String line = s.nextLine();
-                String[] parts = line.split(" \\| ");
-
-                String type = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String desc = parts[2];
-
-                Task t;
-                if (type.equals("T")) {
-                    t = new ToDo(desc);
-                } else if (type.equals("D")) {
-                    LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
-                    t = new Deadline(desc, dateTime);
-                } else {
-                    String[] fromTo = parts[3].split(" to ");
-                    t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
-                }
-
-                if (isDone) {
-                    t.mark();
-                }
+                Task t = getTask(line);
 
                 tasks.add(t);
             }
@@ -63,6 +45,30 @@ public class Storage {
         }
 
         return tasks;
+    }
+
+    private static Task getTask(String line) {
+        String[] parts = line.split(" \\| ");
+
+        String type = parts[0];
+        boolean isDone = parts[1].equals("1");
+        String desc = parts[2];
+
+        Task t;
+        if (type.equals("T")) {
+            t = new ToDo(desc);
+        } else if (type.equals("D")) {
+            LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
+            t = new Deadline(desc, dateTime);
+        } else {
+            String[] fromTo = parts[3].split(" to ");
+            t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
+        }
+
+        if (isDone) {
+            t.mark();
+        }
+        return t;
     }
 
     public void save(TaskList tasks) throws SqonkyException {

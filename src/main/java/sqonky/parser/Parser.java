@@ -87,6 +87,10 @@ public class Parser {
             LocalDateTime fromDate = LocalDateTime.parse(parts[1].trim(), inputFormatter);
             LocalDateTime toDate = LocalDateTime.parse(parts[2].trim(), inputFormatter);
 
+            if (fromDate.isAfter(toDate)) {
+                throw new SqonkyException("The start date cannot be after the end date!\n");
+            }
+
             return new Event(parts[0].trim(), fromDate, toDate);
         } catch (DateTimeParseException e) {
             throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");

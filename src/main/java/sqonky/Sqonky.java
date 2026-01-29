@@ -9,14 +9,19 @@ import sqonky.task.Task;
 import sqonky.ui.Ui;
 
 /**
- * Main application class for sqonky.Sqonky.
- * Handles user input and manages the task list.
+ * Main class for the Sqonky task management application.
+ * Initializes the required components and starts the main command loop.
  */
 public class Sqonky {
     private final Storage storage;
     private TaskList tasks;
     private final Ui ui;
 
+    /**
+     * Initializes the Sqonky application with the specified file path for storage.
+     *
+     * @param filePath The path to the file where task data is saved and loaded.
+     */
     public Sqonky(String filePath) {
         storage = new Storage(filePath);
         ui = new Ui();
@@ -29,16 +34,32 @@ public class Sqonky {
     }
 
     /**
-     * Enum representing valid command types for the application.
+     * Represents the types of commands that the Sqonky application can execute.
      */
     public enum CommandType {
-        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, UNKNOWN
+        /** List all tasks in the current task list. */
+        LIST,
+        /** Mark a specific task as completed. */
+        MARK,
+        /** Revert a completed task to not completed. */
+        UNMARK,
+        /** Remove a task from the list. */
+        DELETE,
+        /** Create a new task without a date. */
+        TODO,
+        /** Create a task with a single deadline date. */
+        DEADLINE,
+        /** Create a task with a start and end date range. */
+        EVENT,
+        /** Filter and view tasks occurring on a specific date. */
+        ON,
+        /** Represents an unrecognized or invalid command input. */
+        UNKNOWN
     }
 
     /**
-     * Runs the sqonky.Sqonky command-line application.
-     * Continuously reads user input, routes commands to specific handlers,
-     * and manages global application state like the task list and count.
+     * Runs the main command loop of the application.
+     * Continuously reads user input and executes commands until an exit command is received.
      */
     public void run() {
         ui.showWelcome();
@@ -98,6 +119,11 @@ public class Sqonky {
         ui.showGoodbye();
     }
 
+    /**
+     * Entry point for the Sqonky application.
+     *
+     * @param args Command line arguments (not used).
+     */
     public static void main(String[] args) {
         new Sqonky("./data/sqonky.txt").run();
     }

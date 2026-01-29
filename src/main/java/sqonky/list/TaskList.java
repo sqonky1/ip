@@ -1,3 +1,7 @@
+package sqonky.list;
+
+import sqonky.task.Task;
+
 import java.util.ArrayList;
 
 public class TaskList {

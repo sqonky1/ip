@@ -20,5 +20,9 @@ text-ui-test/EXPECTED-UNIX.TXT
 production/
 *.class
 
-# test
+# Project binaries
+*.jar
+
+# Data files
 text-ui-test/data/
+/data/

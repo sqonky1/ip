@@ -118,4 +118,28 @@ public class TaskList {
             throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
         }
     }
+
+    /**
+     * Filters the task list for tasks containing the specified keyword and displays them.
+     * Iterates through all tasks and uses the task's string representation to check for matches.
+     * * @param keyword The search term provided by the user.
+     * @param ui The {@code Ui} object used to display the matching results.
+     */
+    public void findTasks(String keyword, Ui ui) {
+        ui.showFindHeader();
+        int count = 0;
+
+        for (int i = 0; i < tasks.size(); i++) {
+            Task t = tasks.get(i);
+            if (t.toString().contains(keyword)) { // Check if keyword is in task description
+                count++;
+                ui.showTaskItem(count, t);
+            }
+        }
+
+        if (count == 0) {
+            ui.showNoMatches();
+        }
+        ui.showEmptyLine();
+    }
 }

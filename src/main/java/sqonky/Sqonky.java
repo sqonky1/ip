@@ -32,7 +32,9 @@ public class Sqonky {
      * Enum representing valid command types for the application.
      */
     public enum CommandType {
-        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, UNKNOWN
+        LIST, MARK, UNMARK, DELETE, TODO, DEADLINE, EVENT, ON, FIND,
+        /** Represents an unrecognized or invalid command input. */
+        UNKNOWN
     }
 
     /**
@@ -87,6 +89,10 @@ public class Sqonky {
                     break;
                 case ON:
                     tasks.listTasksOnDate(command, ui);
+                    break;
+                case FIND:
+                    String keyword = Parser.parseFindKeyword(command);
+                    tasks.findTasks(keyword, ui);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");

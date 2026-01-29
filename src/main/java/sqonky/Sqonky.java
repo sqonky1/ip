@@ -56,15 +56,15 @@ public class Sqonky {
 
                 switch(type) {
                 case LIST:
-                    listTasks();
+                    tasks.listTasks(ui);
                     break;
                 case MARK:
                 case UNMARK:
-                    markUnmark(command);
+                    tasks.markUnmarkTask(command, ui);
                     storage.save(tasks);
                     break;
                 case DELETE:
-                    handleDeleteTask(command);
+                    tasks.deleteTask(command, ui);
                     storage.save(tasks);
                     break;
                 case TODO:
@@ -86,7 +86,7 @@ public class Sqonky {
                     storage.save(tasks);
                     break;
                 case ON:
-                    listTasksOnDate(command);
+                    tasks.listTasksOnDate(command, ui);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");
@@ -100,96 +100,5 @@ public class Sqonky {
 
     public static void main(String[] args) {
         new Sqonky("./data/sqonky.txt").run();
-    }
-
-    private void listTasks() {
-        ui.showListHeader();
-        for (int i = 0; i < tasks.size(); i++) {
-            int num = i + 1;
-            ui.showTaskItem(num, tasks.get(i));
-        }
-        ui.showEmptyLine();
-    }
-
-    private void markUnmark(String command)
-            throws SqonkyException {
-        if (command.equals("mark") || command.equals("unmark")) {
-            // Exception 1: sqonky.task.Task number not provided
-            throw new SqonkyException("Please provide a task number.\n");
-        }
-
-        try {
-            int idx = Integer.parseInt(command.split(" ")[1]) - 1;
-
-            if (idx < 0 || idx >= tasks.size()) {
-                // Exception 2: Invalid index number
-                throw new SqonkyException("I can't find task " + (idx + 1)
-                        + ". You have " + tasks.size() + " tasks.\n");
-            }
-
-            Task t = tasks.get(idx);
-            if (command.startsWith("mark ")) {
-                t.mark();
-                ui.showMarked(t);
-            } else {
-                t.unmark();
-                ui.showUnmarked(t);
-            }
-
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            throw new SqonkyException("That's not a valid task number! Use: mark [number]\n");
-        }
-    }
-
-    private void handleDeleteTask(String command)
-            throws SqonkyException {
-        if (command.equals("delete")) {
-            // Exception 1: sqonky.task.Task number not provided
-            throw new SqonkyException("Please provide a task number.\n");
-        }
-        try {
-            int idx = Integer.parseInt(command.split(" ")[1]) - 1;
-
-            if (idx < 0 || idx >= tasks.size()) {
-                // Exception 2: Invalid index number
-                throw new SqonkyException("I can't find task " + (idx + 1)
-                        + ". You have " + tasks.size() + " tasks.\n");
-            }
-
-            Task removed = tasks.delete(idx);
-            ui.showTaskRemoved(removed, tasks.size());
-        } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            throw new SqonkyException("That's not a valid task number! Use: delete [number]\n");
-        }
-    }
-
-    private void listTasksOnDate(String command) throws SqonkyException {
-        try {
-            String dateStr = command.substring(3).trim();
-            java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
-            ui.showDateSearchHeader(searchDate);
-
-            int count = 0;
-            for (int i = 0; i < tasks.size(); i++) {
-                Task t = tasks.get(i);
-                boolean matches = false;
-                if (t instanceof Deadline) {
-                    matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);
-                } else if (t instanceof Event) {
-                    matches = ((Event) t).getFrom().toLocalDate().equals(searchDate);
-                }
-
-                if (matches) {
-                    count++;
-                    ui.showTaskItem(count, t);
-                }
-            }
-            if (count == 0) {
-                ui.showNoTasksOnDate();
-            }
-            ui.showEmptyLine();
-        } catch (Exception e) {
-            throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
-        }
     }
 }

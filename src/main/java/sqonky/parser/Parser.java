@@ -46,6 +46,9 @@ public class Parser {
         if (command.startsWith("on")) {
             return Sqonky.CommandType.ON;
         }
+        if (command.startsWith("find")) {
+            return Sqonky.CommandType.FIND;
+        }
 
         return Sqonky.CommandType.UNKNOWN;
     }
@@ -145,5 +148,20 @@ public class Parser {
         } catch (DateTimeParseException e) {
             throw new SqonkyException("Please use format: yyyy-mm-dd HHmm (e.g., 2019-12-02 1800)\n");
         }
+    }
+
+    /**
+     * Returns the keyword extracted from a 'find' command.
+     * Validates that the user has provided a search term after the 'find' keyword.
+     *
+     * @param command The full user input string starting with 'find'.
+     * @return The search keyword provided by the user.
+     * @throws SqonkyException If the keyword is missing or contains only whitespace.
+     */
+    public static String parseFindKeyword(String command) throws SqonkyException {
+        if (command.equals("find") || command.substring(4).trim().isEmpty()) {
+            throw new SqonkyException("Please provide a keyword to find!\n");
+        }
+        return command.substring(5).trim();
     }
 }

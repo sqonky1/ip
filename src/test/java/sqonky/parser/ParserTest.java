@@ -120,4 +120,31 @@ public class ParserTest {
         });
         assertEquals("The start date cannot be after the end date!\n", exception.getMessage());
     }
+
+    @Test
+    public void testParseCommandType_findInput_correctEnum() {
+        // Verifies the parser recognizes the 'find' command
+        assertEquals(Sqonky.CommandType.FIND, Parser.parseCommandType("find book"));
+    }
+
+    @Test
+    public void testParseFindKeyword_validInput_success() throws SqonkyException {
+        // Verifies correct keyword extraction
+        assertEquals("book", Parser.parseFindKeyword("find book"));
+    }
+
+    @Test
+    public void testParseFindKeyword_extraSpaces_trimmed() throws SqonkyException {
+        // Verifies that extra leading/trailing spaces are removed
+        assertEquals("read book", Parser.parseFindKeyword("find    read book  "));
+    }
+
+    @Test
+    public void testParseFindKeyword_missingKeyword_exceptionThrown() {
+        // Verifies error handling when no search term is provided
+        SqonkyException exception = assertThrows(SqonkyException.class, () -> {
+            Parser.parseFindKeyword("find ");
+        });
+        assertEquals("Please provide a keyword to find!\n", exception.getMessage());
+    }
 }

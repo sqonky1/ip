@@ -191,4 +191,27 @@ public class TaskList {
             throw new SqonkyException("I can't find that task. You have " + tasks.size() + " tasks.\n");
         }
     }
+
+    /**
+     * Filters the task list for tasks containing the specified keyword and displays them.
+     * Iterates through all tasks and uses the task's string representation to check for matches.
+     * * @param keyword The search term provided by the user.
+     * @param ui The {@code Ui} object used to display the matching results.
+     */
+    public void findTasks(String keyword, Ui ui) {
+        ui.showFindHeader();
+        int count = 0;
+
+        for (Task t : tasks) {
+            if (t.toString().contains(keyword)) { // Check if keyword is in task description
+                count++;
+                ui.showTaskItem(count, t);
+            }
+        }
+
+        if (count == 0) {
+            ui.showNoMatches();
+        }
+        ui.showEmptyLine();
+    }
 }

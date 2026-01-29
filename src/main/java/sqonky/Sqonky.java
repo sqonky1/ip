@@ -53,6 +53,8 @@ public class Sqonky {
         EVENT,
         /** Filter and view tasks occurring on a specific date. */
         ON,
+        /** Represents the command to find tasks by keyword. */
+        FIND,
         /** Represents an unrecognized or invalid command input. */
         UNKNOWN
     }
@@ -108,6 +110,10 @@ public class Sqonky {
                     break;
                 case ON:
                     tasks.listTasksOnDate(command, ui);
+                    break;
+                case FIND:
+                    String keyword = Parser.parseFindKeyword(command);
+                    tasks.findTasks(keyword, ui);
                     break;
                 default:
                     throw new SqonkyException("What are you saying...\n");

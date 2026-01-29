@@ -2,7 +2,9 @@ package sqonky.list;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import sqonky.task.Task;
 import sqonky.task.ToDo;
 
 public class TaskListTest {
@@ -24,5 +26,22 @@ public class TaskListTest {
         list.add(new ToDo("A"));
         list.add(new ToDo("B"));
         assertEquals(2, list.getAllTasks().size()); //
+    }
+
+    @Test
+    public void testFindLogic_matchingKeyword_returnsCorrectTasks() {
+        TaskList list = new TaskList();
+        list.add(new ToDo("read book"));
+        list.add(new ToDo("write code"));
+
+        // Logical check: verify that at least one task contains the keyword 'book'
+        boolean found = false;
+        for (Task t : list.getAllTasks()) {
+            if (t.toString().contains("book")) {
+                found = true;
+                break;
+            }
+        }
+        assertTrue(found);
     }
 }

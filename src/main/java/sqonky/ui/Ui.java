@@ -10,7 +10,7 @@ import java.util.Scanner;
  * task details, and error feedback to the user.
  */
 public class Ui {
-    private Scanner scanner;
+    private final Scanner scanner;
 
     /**
      * Initializes the UI by setting up a {@code Scanner} for standard input.
@@ -141,5 +141,19 @@ public class Ui {
      */
     public void showTaskItem(int index, Task task) {
         System.out.println(index + "." + task);
+    }
+
+    /**
+     * Displays the header message for the list of tasks matching a search keyword.
+     */
+    public void showFindHeader() {
+        System.out.println("Here are the matching tasks in your list:");
+    }
+
+    /**
+     * Informs the user that no tasks were found matching their search keyword.
+     */
+    public void showNoMatches() {
+        System.out.println("No tasks matching that keyword were found.");
     }
 }

@@ -1,5 +1,15 @@
+package sqonky;
+
+import sqonky.list.TaskList;
+import sqonky.parser.Parser;
+import sqonky.storage.Storage;
+import sqonky.task.Deadline;
+import sqonky.task.Event;
+import sqonky.task.Task;
+import sqonky.ui.Ui;
+
 /**
- * Main application class for Sqonky.
+ * Main application class for sqonky.Sqonky.
  * Handles user input and manages the task list.
  */
 public class Sqonky {
@@ -26,7 +36,7 @@ public class Sqonky {
     }
 
     /**
-     * Runs the Sqonky command-line application.
+     * Runs the sqonky.Sqonky command-line application.
      * Continuously reads user input, routes commands to specific handlers,
      * and manages global application state like the task list and count.
      */
@@ -58,19 +68,19 @@ public class Sqonky {
                     storage.save(tasks);
                     break;
                 case TODO:
-                    Task t = Parser.parseToDo(command); // Use Parser
+                    Task t = Parser.parseToDo(command); // Use sqonky.parser.Parser
                     tasks.add(t);
                     ui.showTaskAdded(t, tasks.size());
                     storage.save(tasks);
                     break;
                 case DEADLINE:
-                    Task d = Parser.parseDeadline(command); // Use Parser
+                    Task d = Parser.parseDeadline(command); // Use sqonky.parser.Parser
                     tasks.add(d);
                     ui.showTaskAdded(d, tasks.size());
                     storage.save(tasks);
                     break;
                 case EVENT:
-                    Task e = Parser.parseEvent(command); // Use Parser
+                    Task e = Parser.parseEvent(command); // Use sqonky.parser.Parser
                     tasks.add(e);
                     ui.showTaskAdded(e, tasks.size());
                     storage.save(tasks);
@@ -104,7 +114,7 @@ public class Sqonky {
     private void markUnmark(String command)
             throws SqonkyException {
         if (command.equals("mark") || command.equals("unmark")) {
-            // Exception 1: Task number not provided
+            // Exception 1: sqonky.task.Task number not provided
             throw new SqonkyException("Please provide a task number.\n");
         }
 
@@ -134,7 +144,7 @@ public class Sqonky {
     private void handleDeleteTask(String command)
             throws SqonkyException {
         if (command.equals("delete")) {
-            // Exception 1: Task number not provided
+            // Exception 1: sqonky.task.Task number not provided
             throw new SqonkyException("Please provide a task number.\n");
         }
         try {

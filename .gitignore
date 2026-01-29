@@ -20,3 +20,5 @@ text-ui-test/EXPECTED-UNIX.TXT
 production/
 *.class
 
+# test
+text-ui-test/data/

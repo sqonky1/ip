@@ -1,3 +1,7 @@
+package sqonky.ui;
+
+import sqonky.task.Task;
+
 import java.util.Scanner;
 
 public class Ui {

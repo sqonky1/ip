@@ -10,8 +10,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Handles the parsing of user input into commands and tasks.
+ */
 public class Parser {
 
+    /**
+     * Parses the command type from the user input string.
+     *
+     * @param command The full user input string.
+     * @return The CommandType enum corresponding to the input.
+     */
     public static Sqonky.CommandType parseCommandType(String command) {
         if (command.equals("list")) return Sqonky.CommandType.LIST;
         if (command.startsWith("mark")) return Sqonky.CommandType.MARK;
@@ -24,6 +33,13 @@ public class Parser {
         return Sqonky.CommandType.UNKNOWN;
     }
 
+    /**
+     * Parses a 'todo' command input into a {@code ToDo} object.
+     *
+     * @param command The user input string starting with 'todo'.
+     * @return A {@code ToDo} object with the specified description.
+     * @throws SqonkyException If the description is empty.
+     */
     public static ToDo parseToDo(String command) throws SqonkyException {
         if (command.equals("todo")) {
             // Exception:Command is just 'todo'.
@@ -36,6 +52,13 @@ public class Parser {
         return new ToDo(desc);
     }
 
+    /**
+     * Parses a 'deadline' command input into a {@code Deadline} object.
+     *
+     * @param command The user input string containing '/by'.
+     * @return A {@code Deadline} object with description and deadline time.
+     * @throws SqonkyException If the input format is invalid or dates are missing.
+     */
     public static Deadline parseDeadline(String command) throws SqonkyException {
         if (command.equals("deadline")) {
             // Exception 1: Command is just 'deadline'.
@@ -63,6 +86,16 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a user command string into an {@code Event} task.
+     * * <p>The command must follow the format: "event [description] /from [yyyy-mm-dd HHmm] /to [yyyy-mm-dd HHmm]".
+     * It validates that the description is not empty, both tags exist, and the start date is not after the end date.</p>
+     *
+     * @param command The full user input string starting with "event".
+     * @return A new {@code Event} object containing the description and date range.
+     * @throws SqonkyException If the description is empty, tags are missing,
+     * the date format is invalid, or the start date is after the end date.
+     */
     public static Event parseEvent(String command) throws SqonkyException {
         if (command.equals("event")) {
             // Exception 1: Command is just 'event'.

@@ -8,33 +8,74 @@ import sqonky.SqonkyException;
 
 import java.util.ArrayList;
 
+/**
+ * Represents a list of tasks in the Sqonky application.
+ * Provides methods to add, delete, and retrieve tasks from the collection.
+ */
 public class TaskList {
-    private ArrayList<Task> tasks;
+    private final ArrayList<Task> tasks;
 
+    /**
+     * Initializes an empty task list.
+     */
     public TaskList() {
         this.tasks = new ArrayList<>();
     }
 
+    /**
+     * Initializes a task list with a predefined set of tasks.
+     *
+     * @param tasks An {@code ArrayList} of tasks to populate the list.
+     */
     public TaskList(ArrayList<Task> tasks) {
         this.tasks = tasks;
     }
 
+    /**
+     * Adds a task to the list.
+     *
+     * @param task The {@code Task} object to be added.
+     */
     public void add(Task task) {
         tasks.add(task);
     }
 
+    /**
+     * Removes a task from the list at the specified index.
+     *
+     * @param index The zero-based index of the task to be removed.
+     * @return The {@code Task} that was removed.
+     * @throws IndexOutOfBoundsException If the index is out of range.
+     */
     public Task delete(int index) {
         return tasks.remove(index);
     }
 
+    /**
+     * Retrieves a task from the list at the specified index.
+     *
+     * @param index The zero-based index of the task to retrieve.
+     * @return The {@code Task} at the given index.
+     * @throws IndexOutOfBoundsException If the index is out of range.
+     */
     public Task get(int index) {
         return tasks.get(index);
     }
 
+    /**
+     * Returns the number of tasks currently in the list.
+     *
+     * @return The size of the task list.
+     */
     public int size() {
         return tasks.size();
     }
 
+    /**
+     * Returns the underlying list of all tasks.
+     *
+     * @return An {@code ArrayList} containing all tasks.
+     */
     public ArrayList<Task> getAllTasks() {
         return tasks;
     }

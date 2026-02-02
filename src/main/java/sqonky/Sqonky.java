@@ -18,6 +18,13 @@ public class Sqonky {
     private final Ui ui;
 
     /**
+     * Overloaded constructor for JavaFX that uses a default file path.
+     */
+    public Sqonky() {
+        this("./data/sqonky.txt");
+    }
+
+    /**
      * Initializes the Sqonky application with the specified file path for storage.
      *
      * @param filePath The path to the file where task data is saved and loaded.
@@ -132,5 +139,12 @@ public class Sqonky {
      */
     public static void main(String[] args) {
         new Sqonky("./data/sqonky.txt").run();
+    }
+
+    /**
+     * Generates a response for the user's chat message.
+     */
+    public String getResponse(String input) {
+        return "Sqonky heard: " + input;
     }
 }

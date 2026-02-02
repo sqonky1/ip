@@ -80,26 +80,30 @@ public class TaskList {
     }
 
     /**
-     * Prints all tasks currently in the list to the specified UI.
+     * Generates a string listing all tasks.
      *
-     * @param ui The {@code Ui} object used to display the tasks.
+     * @param ui The UI object for formatting.
+     * @return A formatted list of all tasks.
      */
-    public void listTasks(Ui ui) {
-        ui.showListHeader();
+    public String listTasks(Ui ui) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ui.getListHeader());
         for (int i = 0; i < tasks.size(); i++) {
-            ui.showTaskItem(i + 1, tasks.get(i));
+            sb.append(ui.getTaskItem(i + 1, tasks.get(i)));
         }
-        ui.showEmptyLine();
+        sb.append(ui.getEmptyLine());
+        return sb.toString();
     }
 
     /**
-     * Marks or unmarks a task as done based on the user command.
+     * Marks/unmarks a task and returns the status message.
      *
-     * @param command The full user command string (e.g., "mark 1").
-     * @param ui The {@code Ui} object used to display feedback.
-     * @throws SqonkyException If the task number is missing or invalid.
+     * @param command The user command.
+     * @param ui The UI object for formatting.
+     * @return The result message string.
+     * @throws SqonkyException If index is invalid.
      */
-    public void markUnmarkTask(String command, Ui ui) throws SqonkyException {
+    public String markUnmarkTask(String command, Ui ui) throws SqonkyException {
         String[] parts = command.split(" ");
 
         if (parts.length < 2) {
@@ -112,10 +116,10 @@ public class TaskList {
             Task t = tasks.get(idx);
             if (command.startsWith("mark")) {
                 t.mark();
-                ui.showMarked(t);
+                return ui.getMarked(t);
             } else {
                 t.unmark();
-                ui.showUnmarked(t);
+                return ui.getUnmarked(t);
             }
         } catch (NumberFormatException e) {
             throw new SqonkyException("That's not a valid task number!\n");
@@ -123,13 +127,14 @@ public class TaskList {
     }
 
     /**
-     * Deletes a task from the list based on the user command.
+     * Deletes a task and returns the result message.
      *
-     * @param command The full user command string (e.g., "delete 2").
-     * @param ui The {@code Ui} object used to display feedback.
-     * @throws SqonkyException If the task number is missing or invalid.
+     * @param command The user command.
+     * @param ui The UI object for formatting.
+     * @return The removal confirmation string.
+     * @throws SqonkyException If index is invalid.
      */
-    public void deleteTask(String command, Ui ui) throws SqonkyException {
+    public String deleteTask(String command, Ui ui) throws SqonkyException {
         String[] parts = command.split(" ");
         if (parts.length < 2) {
             throw new SqonkyException("Please provide a task number.\n");
@@ -138,24 +143,26 @@ public class TaskList {
             int idx = Integer.parseInt(parts[1]) - 1;
             validateIndex(idx);
             Task removed = tasks.remove(idx);
-            ui.showTaskRemoved(removed, tasks.size());
+            return ui.getTaskRemoved(removed, tasks.size());
         } catch (NumberFormatException e) {
             throw new SqonkyException("That's not a valid task number!\n");
         }
     }
 
     /**
-     * Filters and displays tasks that occur on a specific date.
+     * Generates a string listing tasks matching a date.
      *
-     * @param command The command containing the date (e.g., "on 2026-08-06").
-     * @param ui The {@code Ui} object used to display the results.
-     * @throws SqonkyException If the date format is invalid.
+     * @param command The user command with date.
+     * @param ui The UI object for formatting.
+     * @return The filtered task list string.
+     * @throws SqonkyException If date format is invalid.
      */
-    public void listTasksOnDate(String command, Ui ui) throws SqonkyException {
+    public String listTasksOnDate(String command, Ui ui) throws SqonkyException {
         try {
             String dateStr = command.substring(3).trim();
             java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
-            ui.showDateSearchHeader(searchDate);
+            StringBuilder sb = new StringBuilder();
+            sb.append(ui.getDateSearchHeader(searchDate));
 
             int count = 0;
             for (Task t : tasks) {
@@ -168,13 +175,14 @@ public class TaskList {
 
                 if (matches) {
                     count++;
-                    ui.showTaskItem(count, t);
+                    sb.append(ui.getTaskItem(count, t));
                 }
             }
             if (count == 0) {
-                ui.showNoTasksOnDate();
+                sb.append(ui.getNoTasksOnDate());
             }
-            ui.showEmptyLine();
+            sb.append(ui.getEmptyLine());
+            return sb.toString();
         } catch (Exception e) {
             throw new SqonkyException("Please use format: on yyyy-mm-dd (e.g., on 2026-08-06)\n");
         }
@@ -193,25 +201,28 @@ public class TaskList {
     }
 
     /**
-     * Filters the task list for tasks containing the specified keyword and displays them.
-     * Iterates through all tasks and uses the task's string representation to check for matches.
-     * * @param keyword The search term provided by the user.
-     * @param ui The {@code Ui} object used to display the matching results.
+     * Generates a string listing tasks matching a keyword.
+     *
+     * @param keyword The search keyword.
+     * @param ui The UI object for formatting.
+     * @return The matching tasks list string.
      */
-    public void findTasks(String keyword, Ui ui) {
-        ui.showFindHeader();
+    public String findTasks(String keyword, Ui ui) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(ui.getFindHeader());
         int count = 0;
 
         for (Task t : tasks) {
             if (t.toString().contains(keyword)) { // Check if keyword is in task description
                 count++;
-                ui.showTaskItem(count, t);
+                sb.append(ui.getTaskItem(count, t));
             }
         }
 
         if (count == 0) {
-            ui.showNoMatches();
+            sb.append(ui.getNoMatches());
         }
-        ui.showEmptyLine();
+        sb.append(ui.getEmptyLine());
+        return sb.toString();
     }
 }

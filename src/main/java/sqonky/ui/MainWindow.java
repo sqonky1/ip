@@ -7,7 +7,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.application.Platform;
+
 import sqonky.Sqonky;
+
+import java.util.Objects;
 
 /**
  * Controller for the main GUI.
@@ -24,8 +28,8 @@ public class MainWindow extends AnchorPane {
 
     private Sqonky sqonky;
 
-    private Image userImage = new Image(this.getClass().getResourceAsStream("/images/sqonkyUser.png"));
-    private Image sqonkyImage = new Image(this.getClass().getResourceAsStream("/images/sqonkyBot.png"));
+    private final Image userImage = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/images/sqonkyUser.png")));
+    private final Image sqonkyImage = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream("/images/sqonkyBot.png")));
 
     @FXML
     public void initialize() {
@@ -35,6 +39,11 @@ public class MainWindow extends AnchorPane {
     /** Injects the Duke instance */
     public void setSqonky(Sqonky s) {
         this.sqonky = s;
+
+        String welcomeMessage = sqonky.getWelcomeMessage();
+        dialogContainer.getChildren().addAll(
+                DialogBox.getSqonkyDialog(welcomeMessage,sqonkyImage)
+        );
     }
 
     /**
@@ -50,6 +59,18 @@ public class MainWindow extends AnchorPane {
                 DialogBox.getSqonkyDialog(response, sqonkyImage)
         );
         userInput.clear();
+
+        if (input.equalsIgnoreCase("bye")) {
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1500); // 1.5 second delay
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Platform.exit();
+                System.exit(0);
+            }).start();
+        }
     }
 }
 

@@ -3,8 +3,6 @@ package sqonky;
 import sqonky.list.TaskList;
 import sqonky.parser.Parser;
 import sqonky.storage.Storage;
-import sqonky.task.Deadline;
-import sqonky.task.Event;
 import sqonky.task.Task;
 import sqonky.ui.Ui;
 
@@ -35,7 +33,7 @@ public class Sqonky {
         try {
             tasks = storage.load();
         } catch (SqonkyException e) {
-            ui.showLoadingError();
+            ui.getLoadingError();
             tasks = new TaskList();
         }
     }
@@ -62,89 +60,67 @@ public class Sqonky {
         ON,
         /** Represents the command to find tasks by keyword. */
         FIND,
+        /** Signal the application to terminate and provide a goodbye message. */
+        BYE,
         /** Represents an unrecognized or invalid command input. */
         UNKNOWN
     }
 
     /**
-     * Runs the main command loop of the application.
-     * Continuously reads user input and executes commands until an exit command is received.
-     */
-    public void run() {
-        ui.showWelcome();
-        boolean isExit = false;
-
-        while (!isExit) {
-            String command = ui.readCommand();
-            if (command.equals("bye")) {
-                isExit = true;
-                continue;
-            }
-
-            try {
-                CommandType type = Parser.parseCommandType(command);
-
-                switch (type) {
-                case LIST:
-                    tasks.listTasks(ui);
-                    break;
-                case MARK:
-                case UNMARK:
-                    tasks.markUnmarkTask(command, ui);
-                    storage.save(tasks);
-                    break;
-                case DELETE:
-                    tasks.deleteTask(command, ui);
-                    storage.save(tasks);
-                    break;
-                case TODO:
-                    Task t = Parser.parseToDo(command); // Use sqonky.parser.Parser
-                    tasks.add(t);
-                    ui.showTaskAdded(t, tasks.size());
-                    storage.save(tasks);
-                    break;
-                case DEADLINE:
-                    Task d = Parser.parseDeadline(command); // Use sqonky.parser.Parser
-                    tasks.add(d);
-                    ui.showTaskAdded(d, tasks.size());
-                    storage.save(tasks);
-                    break;
-                case EVENT:
-                    Task e = Parser.parseEvent(command); // Use sqonky.parser.Parser
-                    tasks.add(e);
-                    ui.showTaskAdded(e, tasks.size());
-                    storage.save(tasks);
-                    break;
-                case ON:
-                    tasks.listTasksOnDate(command, ui);
-                    break;
-                case FIND:
-                    String keyword = Parser.parseFindKeyword(command);
-                    tasks.findTasks(keyword, ui);
-                    break;
-                default:
-                    throw new SqonkyException("What are you saying...\n");
-                }
-            } catch (SqonkyException e) {
-                ui.showError(e.getMessage());
-            }
-        }
-        ui.showGoodbye();
-    }
-
-    /**
-     * Entry point for the Sqonky application.
-     *
-     * @param args Command line arguments (not used).
-     */
-    public static void main(String[] args) {
-        new Sqonky("./data/sqonky.txt").run();
-    }
-
-    /**
-     * Generates a response for the user's chat message.
+     * Processes the user input and returns the appropriate response string.
      */
     public String getResponse(String input) {
-        return "Sqonky heard: " + input;
+        try {
+            CommandType type = Parser.parseCommandType(input);
+
+            switch (type) {
+                case LIST:
+                    return tasks.listTasks(ui);
+                case MARK:
+                case UNMARK:
+                    String markResult = tasks.markUnmarkTask(input, ui);
+                    storage.save(tasks);
+                    return markResult;
+                case DELETE:
+                    String deleteResult = tasks.deleteTask(input, ui);
+                    storage.save(tasks);
+                    return deleteResult;
+                case TODO:
+                    Task t = Parser.parseToDo(input);
+                    tasks.add(t);
+                    storage.save(tasks);
+                    return ui.getTaskAdded(t, tasks.size());
+                case DEADLINE:
+                    Task d = Parser.parseDeadline(input);
+                    tasks.add(d);
+                    storage.save(tasks);
+                    return ui.getTaskAdded(d, tasks.size());
+                case EVENT:
+                    Task e = Parser.parseEvent(input);
+                    tasks.add(e);
+                    storage.save(tasks);
+                    return ui.getTaskAdded(e, tasks.size());
+                case ON:
+                    return tasks.listTasksOnDate(input, ui);
+                case FIND:
+                    String keyword = Parser.parseFindKeyword(input);
+                    return tasks.findTasks(keyword, ui);
+                case BYE:
+                    return ui.getGoodbye();
+                default:
+                    return ui.getError("What are you saying...");
+            }
+        } catch (SqonkyException e) {
+            return ui.getError(e.getMessage());
+        }
+    }
+
+    /**
+     * Returns the welcome message from the UI.
+     *
+     * @return The welcome string.
+     */
+    public String getWelcomeMessage() {
+        return ui.getWelcome();
     }
 }

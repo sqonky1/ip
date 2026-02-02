@@ -34,9 +34,12 @@ public class MainWindow extends AnchorPane {
     @FXML
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
+
+        String css = Objects.requireNonNull(this.getClass().getResource("/css/stylesheet.css")).toExternalForm();
+        this.getStylesheets().add(css);
     }
 
-    /** Injects the Duke instance */
+    /** Injects the Sqonky instance */
     public void setSqonky(Sqonky s) {
         this.sqonky = s;
 

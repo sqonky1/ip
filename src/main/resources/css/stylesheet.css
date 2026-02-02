@@ -1,0 +1,30 @@
+/* stylesheet.css */
+.viewport {
+    -fx-background-color: #f4f4f4;
+}
+
+.dialog-container {
+    -fx-padding: 10;
+}
+
+/* This targets the text bubble itself */
+.label {
+    -fx-padding: 10 15 10 15; /* Internal breathing room */
+    -fx-background-radius: 20;
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-max-width: 280;
+    -fx-wrap-text: true;
+}
+
+/* User bubble: Blush Pink */
+.user-label {
+    -fx-background-color: #E5BAC2;
+    -fx-text-fill: black;
+}
+
+/* Sqonky bubble: Light Teal */
+.sqonky-label {
+    -fx-background-color: #B3E0DC;
+    -fx-text-fill: black;
+}

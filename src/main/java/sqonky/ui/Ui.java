@@ -2,158 +2,160 @@ package sqonky.ui;
 
 import sqonky.task.Task;
 
-import java.util.Scanner;
-
 /**
  * Handles the user interface of the application.
  * This class is responsible for reading user input and displaying messages,
  * task details, and error feedback to the user.
  */
 public class Ui {
-    private final Scanner scanner;
-
     /**
-     * Initializes the UI by setting up a {@code Scanner} for standard input.
-     */
-    public Ui() {
-        this.scanner = new Scanner(System.in);
-    }
-
-    /**
-     * Displays the initial greeting message to the user.
-     */
-    public void showWelcome() {
-        System.out.println("Hello! I'm Sqonky\nWhat can I do for you?\n");
-    }
-
-    /**
-     * Displays the closing message to the user.
-     */
-    public void showGoodbye() {
-        System.out.println("Bye. Hope to see you again soon!");
-    }
-
-    /**
-     * Reads the next line of command input from the user.
+     * Returns the initial greeting message.
      *
-     * @return The raw input string entered by the user.
+     * @return The welcome message string.
      */
-    public String readCommand() {
-        return scanner.nextLine();
+    public String getWelcome() {
+        return "Hello! I'm Sqonky\nWhat can I do for you?\n";
     }
 
     /**
-     * Displays the header for the task list.
-     */
-    public void showListHeader() {
-        System.out.println("Here are the tasks in your list:");
-    }
-
-    /**
-     * Displays a specific error message to the user.
+     * Returns the closing message.
      *
-     * @param message The detailed error message to be printed.
+     * @return The goodbye message string.
      */
-    public void showError(String message) {
-        System.out.println(message);
+    public String getGoodbye() {
+        return "Bye. Hope to see you again soon!\n";
     }
 
     /**
-     * Informs the user that the storage file could not be loaded.
-     * Indicates that the application will proceed with an empty task list.
-     */
-    public void showLoadingError() {
-        System.out.println("Error loading tasks from file. Starting with an empty list.");
-    }
-
-    /**
-     * Prints an empty line to the console for better visual spacing in the UI.
-     */
-    public void showEmptyLine() {
-        System.out.println();
-    }
-
-    /**
-     * Notifies the user when a task has been successfully added.
+     * Returns the header for the task list.
      *
-     * @param t The task that was added.
-     * @param size The new total number of tasks in the list.
+     * @return The list header string.
      */
-    public void showTaskAdded(Task t, int size) {
-        System.out.println("Got it. I've added this task:\n  "
+    public String getListHeader() {
+        return "Here are the tasks in your list:\n";
+    }
+
+    /**
+     * Returns a specific error message.
+     *
+     * @param message The error details.
+     * @return The formatted error string.
+     */
+    public String getError(String message) {
+        return message + "\n";
+    }
+
+    /**
+     * Returns the storage loading error message.
+     *
+     * @return The loading error string.
+     */
+    public String getLoadingError() {
+        return "Error loading tasks from file. Starting with an empty list.\n";
+    }
+
+    /**
+     * Returns an empty line for spacing.
+     *
+     * @return A newline string.
+     */
+    public String getEmptyLine() {
+        return "\n";
+    }
+
+    /**
+     * Returns the message for a successfully added task.
+     *
+     * @param t The task added.
+     * @param size The new size of the list.
+     * @return The task addition confirmation string.
+     */
+    public String getTaskAdded(Task t, int size) {
+        return "Got it. I've added this task:\n  "
                 + t
                 + "\nNow you have " + size + " " + (size == 1 ? "task" : "tasks")
-                + " in the list.\n");
+                + " in the list.\n\n";
     }
 
     /**
-     * Notifies the user when a task has been successfully removed.
+     * Returns the message for a successfully removed task.
      *
-     * @param t The task that was removed.
-     * @param size The remaining number of tasks in the list.
+     * @param t The task removed.
+     * @param size The remaining size of the list.
+     * @return The task removal confirmation string.
      */
-    public void showTaskRemoved(Task t, int size) {
-        System.out.println("Noted. I've removed this task:\n  "
+    public String getTaskRemoved(Task t, int size) {
+        return "Noted. I've removed this task:\n  "
                 + t + "\n"
                 + "Now you have " + size + " " + (size == 1 ? "task" : "tasks")
-                + " in the list\n");
+                + " in the list\n\n";
     }
 
     /**
-     * Displays a task that has been marked as completed.
+     * Returns the message for a task marked as done.
      *
-     * @param t The task marked as done.
+     * @param t The marked task.
+     * @return The completion confirmation string.
      */
-    public void showMarked(Task t) {
-        System.out.println("Nice! I've marked this task as done:\n" + t + "\n");
+    public String getMarked(Task t) {
+        return "Nice! I've marked this task as done:\n" + t + "\n\n";
     }
 
     /**
-     * Displays a task that has been unmarked (reverted to not done).
+     * Returns the message for a task marked as not done.
      *
-     * @param t The task marked as incomplete.
+     * @param t The unmarked task.
+     * @return The incompletion confirmation string.
      */
-    public void showUnmarked(Task t) {
-        System.out.println("OK, I've marked this task as not done yet:\n" + t + "\n");
+    public String getUnmarked(Task t) {
+        return "OK, I've marked this task as not done yet:\n" + t + "\n\n";
     }
 
     /**
-     * Displays a header indicating that the following tasks occur on a specific date.
+     * Returns the header for a date-specific search.
      *
-     * @param date The date being searched for.
+     * @param date The date searched.
+     * @return The search header string.
      */
-    public void showDateSearchHeader(java.time.LocalDate date) {
-        System.out.println("Here are the tasks on " + date + ":");
+    public String getDateSearchHeader(java.time.LocalDate date) {
+        return "Here are the tasks on " + date + ":\n";
     }
 
     /**
-     * Informs the user that no tasks were found matching the specified date.
-     */
-    public void showNoTasksOnDate() {
-        System.out.println("No tasks found for this date.");
-    }
-
-    /**
-     * Displays a task item with its corresponding list index.
+     * Returns the message when no tasks are found on a date.
      *
-     * @param index The 1-based index of the task.
-     * @param task The task object to display.
+     * @return The empty date search string.
      */
-    public void showTaskItem(int index, Task task) {
-        System.out.println(index + "." + task);
+    public String getNoTasksOnDate() {
+        return "No tasks found for this date.\n";
     }
 
     /**
-     * Displays the header message for the list of tasks matching a search keyword.
+     * Returns a single task item formatted with its index.
+     *
+     * @param index The 1-based index.
+     * @param task The task object.
+     * @return The formatted task item string.
      */
-    public void showFindHeader() {
-        System.out.println("Here are the matching tasks in your list:");
+    public String getTaskItem(int index, Task task) {
+        return index + "." + task + "\n";
     }
 
     /**
-     * Informs the user that no tasks were found matching their search keyword.
+     * Returns the header for keyword search results.
+     *
+     * @return The find header string.
      */
-    public void showNoMatches() {
-        System.out.println("No tasks matching that keyword were found.");
+    public String getFindHeader() {
+        return "Here are the matching tasks in your list:\n";
+    }
+
+    /**
+     * Returns the message when no keyword matches are found.
+     *
+     * @return The no-matches string.
+     */
+    public String getNoMatches() {
+        return "No tasks matching that keyword were found.\n";
     }
 }

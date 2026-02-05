@@ -3,8 +3,6 @@ package sqonky;
 import sqonky.list.TaskList;
 import sqonky.parser.Parser;
 import sqonky.storage.Storage;
-import sqonky.task.Deadline;
-import sqonky.task.Event;
 import sqonky.task.Task;
 import sqonky.ui.Ui;
 
@@ -18,6 +16,13 @@ public class Sqonky {
     private final Ui ui;
 
     /**
+     * Overloaded constructor for JavaFX that uses a default file path.
+     */
+    public Sqonky() {
+        this("./data/sqonky.txt");
+    }
+
+    /**
      * Initializes the Sqonky application with the specified file path for storage.
      *
      * @param filePath The path to the file where task data is saved and loaded.
@@ -28,7 +33,7 @@ public class Sqonky {
         try {
             tasks = storage.load();
         } catch (SqonkyException e) {
-            ui.showLoadingError();
+            ui.getLoadingError();
             tasks = new TaskList();
         }
     }
@@ -55,82 +60,67 @@ public class Sqonky {
         ON,
         /** Represents the command to find tasks by keyword. */
         FIND,
+        /** Signal the application to terminate and provide a goodbye message. */
+        BYE,
         /** Represents an unrecognized or invalid command input. */
         UNKNOWN
     }
 
     /**
-     * Runs the main command loop of the application.
-     * Continuously reads user input and executes commands until an exit command is received.
+     * Processes the user input and returns the appropriate response string.
      */
-    public void run() {
-        ui.showWelcome();
-        boolean isExit = false;
+    public String getResponse(String input) {
+        try {
+            CommandType type = Parser.parseCommandType(input);
 
-        while (!isExit) {
-            String command = ui.readCommand();
-            if (command.equals("bye")) {
-                isExit = true;
-                continue;
-            }
-
-            try {
-                CommandType type = Parser.parseCommandType(command);
-
-                switch (type) {
+            switch (type) {
                 case LIST:
-                    tasks.listTasks(ui);
-                    break;
+                    return tasks.listTasks(ui);
                 case MARK:
                 case UNMARK:
-                    tasks.markUnmarkTask(command, ui);
+                    String markResult = tasks.markUnmarkTask(input, ui);
                     storage.save(tasks);
-                    break;
+                    return markResult;
                 case DELETE:
-                    tasks.deleteTask(command, ui);
+                    String deleteResult = tasks.deleteTask(input, ui);
                     storage.save(tasks);
-                    break;
+                    return deleteResult;
                 case TODO:
-                    Task t = Parser.parseToDo(command); // Use sqonky.parser.Parser
+                    Task t = Parser.parseToDo(input);
                     tasks.add(t);
-                    ui.showTaskAdded(t, tasks.size());
                     storage.save(tasks);
-                    break;
+                    return ui.getTaskAdded(t, tasks.size());
                 case DEADLINE:
-                    Task d = Parser.parseDeadline(command); // Use sqonky.parser.Parser
+                    Task d = Parser.parseDeadline(input);
                     tasks.add(d);
-                    ui.showTaskAdded(d, tasks.size());
                     storage.save(tasks);
-                    break;
+                    return ui.getTaskAdded(d, tasks.size());
                 case EVENT:
-                    Task e = Parser.parseEvent(command); // Use sqonky.parser.Parser
+                    Task e = Parser.parseEvent(input);
                     tasks.add(e);
-                    ui.showTaskAdded(e, tasks.size());
                     storage.save(tasks);
-                    break;
+                    return ui.getTaskAdded(e, tasks.size());
                 case ON:
-                    tasks.listTasksOnDate(command, ui);
-                    break;
+                    return tasks.listTasksOnDate(input, ui);
                 case FIND:
-                    String keyword = Parser.parseFindKeyword(command);
-                    tasks.findTasks(keyword, ui);
-                    break;
+                    String keyword = Parser.parseFindKeyword(input);
+                    return tasks.findTasks(keyword, ui);
+                case BYE:
+                    return ui.getGoodbye();
                 default:
-                    throw new SqonkyException("What are you saying...\n");
-                }
-            } catch (SqonkyException e) {
-                ui.showError(e.getMessage());
+                    return ui.getError("What are you saying...");
             }
+        } catch (SqonkyException e) {
+            return ui.getError(e.getMessage());
         }
-        ui.showGoodbye();
     }
 
     /**
-     * Entry point for the Sqonky application.
+     * Returns the welcome message from the UI.
      *
-     * @param args Command line arguments (not used).
+     * @return The welcome string.
      */
-    public static void main(String[] args) {
-        new Sqonky("./data/sqonky.txt").run();
+    public String getWelcomeMessage() {
+        return ui.getWelcome();
     }
 }

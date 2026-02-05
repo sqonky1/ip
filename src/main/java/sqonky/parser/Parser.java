@@ -49,6 +49,9 @@ public class Parser {
         if (command.startsWith("find")) {
             return Sqonky.CommandType.FIND;
         }
+        if (command.startsWith("bye")) {
+            return Sqonky.CommandType.BYE;
+        }
 
         return Sqonky.CommandType.UNKNOWN;
     }

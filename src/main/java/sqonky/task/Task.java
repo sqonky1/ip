@@ -4,6 +4,8 @@ package sqonky.task;
  * Represents a generic task with a description and completion status.
  */
 public class Task {
+    public static final String SAVE_DELIMITER = " | ";
+
     protected String description;
     protected boolean isDone;
 
@@ -47,7 +49,7 @@ public class Task {
      * @return A pipe-separated string containing the status and description.
      */
     public String toSaveFormat() {
-        return (isDone ? "1" : "0") + " | " + description;
+        return (isDone ? "1" : "0") + SAVE_DELIMITER + description;
     }
 
     /**

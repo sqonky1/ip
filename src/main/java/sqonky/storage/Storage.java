@@ -16,6 +16,20 @@ import java.util.Scanner;
 import java.time.LocalDateTime;
 
 public class Storage {
+    // --- Constants for Save Format ---
+    private static final String DELIMITER = " \\| ";
+    private static final String EVENT_DATE_SEPARATOR = " to ";
+    private static final String TODO_TYPE = "T";
+    private static final String DEADLINE_TYPE = "D";
+    private static final String EVENT_TYPE = "E";
+    private static final String IS_DONE_SIGNAL = "1";
+
+    // --- Array Indices ---
+    private static final int INDEX_TYPE = 0;
+    private static final int INDEX_IS_DONE = 1;
+    private static final int INDEX_DESCRIPTION = 2;
+    private static final int INDEX_DATES = 3;
+
     private final String filePath;
 
     /**
@@ -45,45 +59,56 @@ public class Storage {
             return tasks;
         }
 
-        try {
-            Scanner s = new Scanner(f);
-
+        try (Scanner s = new Scanner(f)) {
             while (s.hasNext()) {
                 String line = s.nextLine();
-                Task t = getTask(line);
-
-                tasks.add(t);
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                tasks.add(getTask(line));
             }
-            s.close();
-        } catch (IOException e) {
+        } catch (IOException | SqonkyException e) {
             System.out.println("Error loading tasks: " + e.getMessage());
         }
 
         return tasks;
     }
 
-    private static Task getTask(String line) {
-        String[] parts = line.split(" \\| ");
+    private static Task getTask(String line) throws SqonkyException {
+        String[] parts = line.split(DELIMITER);
 
-        String type = parts[0];
-        boolean isDone = parts[1].equals("1");
-        String desc = parts[2];
+        if (parts.length < 3) {
+            throw new SqonkyException("Corrupted task line found in storage.");
+        }
 
-        Task t;
-        if (type.equals("T")) {
-            t = new ToDo(desc);
-        } else if (type.equals("D")) {
-            LocalDateTime dateTime = LocalDateTime.parse(parts[3]);
-            t = new Deadline(desc, dateTime);
-        } else {
-            String[] fromTo = parts[3].split(" to ");
-            t = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
+        String type = parts[INDEX_TYPE];
+        boolean isDone = parts[INDEX_IS_DONE].equals(IS_DONE_SIGNAL);
+        String desc = parts[INDEX_DESCRIPTION];
+
+        Task task;
+        try {
+            switch (type) {
+            case TODO_TYPE:
+                task = new ToDo(desc);
+                break;
+            case DEADLINE_TYPE:
+                task = new Deadline(desc, LocalDateTime.parse(parts[INDEX_DATES]));
+                break;
+            case EVENT_TYPE:
+                String[] fromTo = parts[INDEX_DATES].split(EVENT_DATE_SEPARATOR);
+                task = new Event(desc, LocalDateTime.parse(fromTo[0]), LocalDateTime.parse(fromTo[1]));
+                break;
+            default:
+                throw new SqonkyException("Unknown task type in storage: " + type);
+            }
+        } catch (Exception e) {
+            throw new SqonkyException("Error parsing task dates in storage.");
         }
 
         if (isDone) {
-            t.mark();
+            task.mark();
         }
-        return t;
+        return task;
     }
 
     /**
@@ -98,12 +123,12 @@ public class Storage {
         assert tasks != null : "TaskList to save cannot be null";
         try {
             Files.createDirectories(Paths.get(new File(filePath).getParent()));
-            FileWriter fw = new FileWriter(filePath);
 
-            for (Task t : tasks.getAllTasks()) {
-                fw.write(t.toSaveFormat() + System.lineSeparator());
+            try (FileWriter fw = new FileWriter(filePath)) {
+                for (Task t : tasks.getAllTasks()) {
+                    fw.write(t.toSaveFormat() + System.lineSeparator());
+                }
             }
-            fw.close();
         } catch (IOException e) {
             throw new SqonkyException("Something went wrong while saving: " + e.getMessage());
         }

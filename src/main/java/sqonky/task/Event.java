@@ -43,7 +43,7 @@ public class Event extends Task{
      */
     @Override
     public String toSaveFormat() {
-        return "E | " + super.toSaveFormat() + " | " + from + " to " + to;
+        return "E" + SAVE_DELIMITER + super.toSaveFormat() + SAVE_DELIMITER + from + " to " + to;
     }
 
     /**

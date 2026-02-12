@@ -39,7 +39,7 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveFormat() {
-        return "D | " + super.toSaveFormat() + " | " + by;
+        return "D" + SAVE_DELIMITER + super.toSaveFormat() + SAVE_DELIMITER + by;
     }
 
     /**

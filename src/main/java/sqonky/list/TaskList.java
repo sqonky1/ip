@@ -13,6 +13,9 @@ import java.util.ArrayList;
  * Provides methods to add, delete, and retrieve tasks from the collection.
  */
 public class TaskList {
+    private static final int DISPLAY_OFFSET = 1;
+    private static final int ON_CMD_LENGTH = 3; // Length of "on "
+
     private final ArrayList<Task> tasks;
 
     /**
@@ -90,64 +93,76 @@ public class TaskList {
         StringBuilder sb = new StringBuilder();
         sb.append(ui.getListHeader());
         for (int i = 0; i < tasks.size(); i++) {
-            sb.append(ui.getTaskItem(i + 1, tasks.get(i)));
+            sb.append(ui.getTaskItem(i + DISPLAY_OFFSET, tasks.get(i)));
         }
         sb.append(ui.getEmptyLine());
         return sb.toString();
     }
 
     /**
-     * Marks/unmarks a task and returns the status message.
-     *
-     * @param command The user command.
-     * @param ui The UI object for formatting.
-     * @return The result message string.
-     * @throws SqonkyException If index is invalid.
+     * Extracts and validates the task index from the user command.
+     * @param command The user command (e.g., "mark 1").
+     * @return The zero-based index of the task.
+     * @throws SqonkyException If the input is not a number or the index is out of bounds.
      */
-    public String markUnmarkTask(String command, Ui ui) throws SqonkyException {
+    private int getTaskIndex(String command) throws SqonkyException {
         String[] parts = command.split(" ");
 
         if (parts.length < 2) {
             throw new SqonkyException("Please provide a task number.\n");
         }
-        try {
-            int idx = Integer.parseInt(parts[1]) - 1;
-            validateIndex(idx);
 
-            Task t = tasks.get(idx);
-            if (command.startsWith("mark")) {
-                t.mark();
-                return ui.getMarked(t);
-            } else {
-                t.unmark();
-                return ui.getUnmarked(t);
-            }
+        try {
+            int idx = Integer.parseInt(parts[1]) - DISPLAY_OFFSET;
+            validateIndex(idx);
+            return idx;
         } catch (NumberFormatException e) {
             throw new SqonkyException("That's not a valid task number!\n");
         }
     }
 
     /**
-     * Deletes a task and returns the result message.
+     * Marks a task as completed and returns a confirmation message.
      *
-     * @param command The user command.
-     * @param ui The UI object for formatting.
-     * @return The removal confirmation string.
-     * @throws SqonkyException If index is invalid.
+     * @param command The user command containing the task index.
+     * @param ui The UI object for formatting the response.
+     * @return A confirmation message from the UI.
+     * @throws SqonkyException If the task index is invalid.
+     */
+    public String markTask(String command, Ui ui) throws SqonkyException {
+        int idx = getTaskIndex(command);
+        Task t = tasks.get(idx);
+        t.mark();
+        return ui.getMarked(t);
+    }
+
+    /**
+     * Unmarks a task as incomplete and returns a confirmation message.
+     *
+     * @param command The user command containing the task index.
+     * @param ui The UI object for formatting the response.
+     * @return A confirmation message from the UI.
+     * @throws SqonkyException If the task index is invalid.
+     */
+    public String unmarkTask(String command, Ui ui) throws SqonkyException {
+        int idx = getTaskIndex(command);
+        Task t = tasks.get(idx);
+        t.unmark();
+        return ui.getUnmarked(t); // Also fixed the typo here!
+    }
+
+    /**
+     * Deletes a task from the list and returns a confirmation message.
+     *
+     * @param command The user command containing the task index.
+     * @param ui The UI object for formatting the response.
+     * @return A message confirming the removal and the current list size.
+     * @throws SqonkyException If the task index is invalid.
      */
     public String deleteTask(String command, Ui ui) throws SqonkyException {
-        String[] parts = command.split(" ");
-        if (parts.length < 2) {
-            throw new SqonkyException("Please provide a task number.\n");
-        }
-        try {
-            int idx = Integer.parseInt(parts[1]) - 1;
-            validateIndex(idx);
-            Task removed = tasks.remove(idx);
-            return ui.getTaskRemoved(removed, tasks.size());
-        } catch (NumberFormatException e) {
-            throw new SqonkyException("That's not a valid task number!\n");
-        }
+        int idx = getTaskIndex(command);
+        Task removed = tasks.remove(idx);
+        return ui.getTaskRemoved(removed, tasks.size());
     }
 
     /**
@@ -160,7 +175,7 @@ public class TaskList {
      */
     public String listTasksOnDate(String command, Ui ui) throws SqonkyException {
         try {
-            String dateStr = command.substring(3).trim();
+            String dateStr = command.substring(ON_CMD_LENGTH).trim();
             java.time.LocalDate searchDate = java.time.LocalDate.parse(dateStr);
             StringBuilder sb = new StringBuilder();
             sb.append(ui.getDateSearchHeader(searchDate));

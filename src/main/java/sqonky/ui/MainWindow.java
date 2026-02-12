@@ -41,6 +41,7 @@ public class MainWindow extends AnchorPane {
 
     /** Injects the Sqonky instance */
     public void setSqonky(Sqonky s) {
+        assert s != null : "Sqonky instance passed to MainWindow cannot be null";
         this.sqonky = s;
 
         String welcomeMessage = sqonky.getWelcomeMessage();

@@ -38,6 +38,7 @@ public class Storage {
      * @param filePath The path of the file used for data persistence.
      */
     public Storage(String filePath) {
+        assert filePath != null && !filePath.trim().isEmpty() : "File path cannot be empty";
         this.filePath = filePath;
     }
 
@@ -119,6 +120,7 @@ public class Storage {
      * @throws SqonkyException If an {@code IOException} occurs during the saving process.
      */
     public void save(TaskList tasks) throws SqonkyException {
+        assert tasks != null : "TaskList to save cannot be null";
         try {
             Files.createDirectories(Paths.get(new File(filePath).getParent()));
 

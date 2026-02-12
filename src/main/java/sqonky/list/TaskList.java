@@ -40,6 +40,7 @@ public class TaskList {
      * @param task The {@code Task} object to be added.
      */
     public void add(Task task) {
+        assert task != null : "Task to be added cannot be null";
         tasks.add(task);
     }
 

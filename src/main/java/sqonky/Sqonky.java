@@ -72,6 +72,7 @@ public class Sqonky {
     public String getResponse(String input) {
         try {
             CommandType type = Parser.parseCommandType(input);
+            assert type != null : "CommandType should not be null";
 
             switch (type) {
             case LIST:

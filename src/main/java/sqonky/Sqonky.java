@@ -74,45 +74,135 @@ public class Sqonky {
             CommandType type = Parser.parseCommandType(input);
 
             switch (type) {
-                case LIST:
-                    return tasks.listTasks(ui);
-                case MARK:
-                case UNMARK:
-                    String markResult = tasks.markUnmarkTask(input, ui);
-                    storage.save(tasks);
-                    return markResult;
-                case DELETE:
-                    String deleteResult = tasks.deleteTask(input, ui);
-                    storage.save(tasks);
-                    return deleteResult;
-                case TODO:
-                    Task t = Parser.parseToDo(input);
-                    tasks.add(t);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(t, tasks.size());
-                case DEADLINE:
-                    Task d = Parser.parseDeadline(input);
-                    tasks.add(d);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(d, tasks.size());
-                case EVENT:
-                    Task e = Parser.parseEvent(input);
-                    tasks.add(e);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(e, tasks.size());
-                case ON:
-                    return tasks.listTasksOnDate(input, ui);
-                case FIND:
-                    String keyword = Parser.parseFindKeyword(input);
-                    return tasks.findTasks(keyword, ui);
-                case BYE:
-                    return ui.getGoodbye();
-                default:
-                    return ui.getError("What are you saying...");
+            case LIST:
+                return tasks.listTasks(ui);
+            case MARK:
+                return handleMark(input);
+            case UNMARK:
+                return handleUnmark(input);
+            case DELETE:
+                return handleDelete(input);
+            case TODO:
+                return handleToDo(input);
+            case DEADLINE:
+                return handleDeadline(input);
+            case EVENT:
+                return handleEvent(input);
+            case ON:
+                return tasks.listTasksOnDate(input, ui);
+            case FIND:
+                return handleFind(input);
+            case BYE:
+                return ui.getGoodbye();
+            default:
+                return ui.getError("What are you saying...");
             }
         } catch (SqonkyException e) {
             return ui.getError(e.getMessage());
         }
+    }
+
+    // --- Helper Methods (Low-Level Implementation Details) ---
+
+    /**
+     * Handles the execution of the 'mark' command.
+     *
+     * @param input The full user input string.
+     * @return The response string indicating the task has been marked.
+     * @throws SqonkyException If the task index is invalid.
+     */
+    private String handleMark(String input) throws SqonkyException {
+        String result = tasks.markUnmarkTask(input, ui);
+        storage.save(tasks);
+        return result;
+    }
+
+    /**
+     * Handles the execution of the 'unmark' command.
+     *
+     * @param input The full user input string.
+     * @return The response string indicating the task has been unmarked.
+     * @throws SqonkyException If the task index is invalid.
+     */
+    private String handleUnmark(String input) throws SqonkyException {
+        String result = tasks.markUnmarkTask(input, ui);
+        storage.save(tasks);
+        return result;
+    }
+
+    /**
+     * Handles the execution of the 'delete' command.
+     *
+     * @param input The full user input string.
+     * @return The response string confirming the task deletion.
+     * @throws SqonkyException If the task index is invalid.
+     */
+    private String handleDelete(String input) throws SqonkyException {
+        String result = tasks.deleteTask(input, ui);
+        storage.save(tasks);
+        return result;
+    }
+
+    /**
+     * Handles the parsing and addition of a 'todo' task.
+     *
+     * @param input The full user input string.
+     * @return The response string confirming the task addition.
+     * @throws SqonkyException If the todo description is empty.
+     */
+    private String handleToDo(String input) throws SqonkyException {
+        Task t = Parser.parseToDo(input);
+        return addTaskAndSave(t);
+    }
+
+    /**
+     * Handles the parsing and addition of a 'deadline' task.
+     *
+     * @param input The full user input string.
+     * @return The response string confirming the task addition.
+     * @throws SqonkyException If the format is invalid or dates are missing.
+     */
+    private String handleDeadline(String input) throws SqonkyException {
+        Task t = Parser.parseDeadline(input);
+        return addTaskAndSave(t);
+    }
+
+    /**
+     * Handles the parsing and addition of an 'event' task.
+     *
+     * @param input The full user input string.
+     * @return The response string confirming the task addition.
+     * @throws SqonkyException If the format is invalid or dates are missing.
+     */
+    private String handleEvent(String input) throws SqonkyException {
+        Task t = Parser.parseEvent(input);
+        return addTaskAndSave(t);
+    }
+
+    /**
+     * Handles the execution of the 'find' command.
+     *
+     * @param input The full user input string.
+     * @return A string listing all tasks that match the keyword.
+     * @throws SqonkyException If the keyword is missing.
+     */
+    private String handleFind(String input) throws SqonkyException {
+        String keyword = Parser.parseFindKeyword(input);
+        return tasks.findTasks(keyword, ui);
+    }
+
+    /**
+     * Centralizes the logic for adding a task, saving to storage, and generating the response.
+     * This helper method reduces code duplication across different task types.
+     *
+     * @param t The task object to be added.
+     * @return The response string from the UI.
+     * @throws SqonkyException If an error occurs during saving.
+     */
+    private String addTaskAndSave(Task t) throws SqonkyException {
+        tasks.add(t);
+        storage.save(tasks);
+        return ui.getTaskAdded(t, tasks.size());
     }
 
     /**

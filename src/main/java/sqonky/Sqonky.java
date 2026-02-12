@@ -72,43 +72,44 @@ public class Sqonky {
     public String getResponse(String input) {
         try {
             CommandType type = Parser.parseCommandType(input);
+            assert type != null : "CommandType should not be null";
 
             switch (type) {
-                case LIST:
-                    return tasks.listTasks(ui);
-                case MARK:
-                case UNMARK:
-                    String markResult = tasks.markUnmarkTask(input, ui);
-                    storage.save(tasks);
-                    return markResult;
-                case DELETE:
-                    String deleteResult = tasks.deleteTask(input, ui);
-                    storage.save(tasks);
-                    return deleteResult;
-                case TODO:
-                    Task t = Parser.parseToDo(input);
-                    tasks.add(t);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(t, tasks.size());
-                case DEADLINE:
-                    Task d = Parser.parseDeadline(input);
-                    tasks.add(d);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(d, tasks.size());
-                case EVENT:
-                    Task e = Parser.parseEvent(input);
-                    tasks.add(e);
-                    storage.save(tasks);
-                    return ui.getTaskAdded(e, tasks.size());
-                case ON:
-                    return tasks.listTasksOnDate(input, ui);
-                case FIND:
-                    String keyword = Parser.parseFindKeyword(input);
-                    return tasks.findTasks(keyword, ui);
-                case BYE:
-                    return ui.getGoodbye();
-                default:
-                    return ui.getError("What are you saying...");
+            case LIST:
+                return tasks.listTasks(ui);
+            case MARK:
+            case UNMARK:
+                String markResult = tasks.markUnmarkTask(input, ui);
+                storage.save(tasks);
+                return markResult;
+            case DELETE:
+                String deleteResult = tasks.deleteTask(input, ui);
+                storage.save(tasks);
+                return deleteResult;
+            case TODO:
+                Task t = Parser.parseToDo(input);
+                tasks.add(t);
+                storage.save(tasks);
+                return ui.getTaskAdded(t, tasks.size());
+            case DEADLINE:
+                Task d = Parser.parseDeadline(input);
+                tasks.add(d);
+                storage.save(tasks);
+                return ui.getTaskAdded(d, tasks.size());
+            case EVENT:
+                Task e = Parser.parseEvent(input);
+                tasks.add(e);
+                storage.save(tasks);
+                return ui.getTaskAdded(e, tasks.size());
+            case ON:
+                return tasks.listTasksOnDate(input, ui);
+            case FIND:
+                String keyword = Parser.parseFindKeyword(input);
+                return tasks.findTasks(keyword, ui);
+            case BYE:
+                return ui.getGoodbye();
+            default:
+                return ui.getError("What are you saying...");
             }
         } catch (SqonkyException e) {
             return ui.getError(e.getMessage());

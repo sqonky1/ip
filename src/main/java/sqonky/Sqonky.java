@@ -112,7 +112,7 @@ public class Sqonky {
      * @throws SqonkyException If the task index is invalid.
      */
     private String handleMark(String input) throws SqonkyException {
-        String result = tasks.markUnmarkTask(input, ui);
+        String result = tasks.markTask(input, ui);
         storage.save(tasks);
         return result;
     }
@@ -125,7 +125,7 @@ public class Sqonky {
      * @throws SqonkyException If the task index is invalid.
      */
     private String handleUnmark(String input) throws SqonkyException {
-        String result = tasks.markUnmarkTask(input, ui);
+        String result = tasks.unmarkTask(input, ui);
         storage.save(tasks);
         return result;
     }

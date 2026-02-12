@@ -32,6 +32,22 @@ public class Deadline extends Task {
     }
 
     /**
+     * Compares this deadline with another task for equality.
+     * A deadline is a duplicate if it has the same description and 'by' date.
+     *
+     * @param other The task to compare against.
+     * @return true if both description and deadline time match.
+     */
+    @Override
+    public boolean isDuplicate(Task other) {
+        if (other instanceof Deadline) {
+            Deadline o = (Deadline) other;
+            return super.isDuplicate(other) && this.by.equals(o.by);
+        }
+        return false;
+    }
+
+    /**
      * Returns the string representation of the deadline formatted for storage.
      * Prefixes the base task save format with "D" and appends the deadline time.
      *

@@ -36,6 +36,24 @@ public class Event extends Task{
     }
 
     /**
+     * Compares this event with another task for equality.
+     * An event is a duplicate if it has the same description, start time, and end time.
+     *
+     * @param other The task to compare against.
+     * @return true if description and the entire date range match.
+     */
+    @Override
+    public boolean isDuplicate(Task other) {
+        if (other instanceof Event) {
+            Event o = (Event) other;
+            return super.isDuplicate(other) &&
+                    this.from.equals(o.from) &&
+                    this.to.equals(o.to);
+        }
+        return false;
+    }
+
+    /**
      * Returns the string representation of the event formatted for storage.
      * Prefixes the base task save format with "E" and appends the "from to" date range.
      *

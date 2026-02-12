@@ -44,6 +44,18 @@ public class Task {
     }
 
     /**
+     * Compares this task with another to check for duplicates based on description.
+     * Comparisons are case-insensitive.
+     *
+     * @param other The task to compare against.
+     * @return true if the descriptions match, false otherwise.
+     */
+    public boolean isDuplicate(Task other) {
+        if (other == null) return false;
+        return this.description.equalsIgnoreCase(other.description);
+    }
+
+    /**
      * Returns the string representation of the task formatted for storage.
      *
      * @return A pipe-separated string containing the status and description.

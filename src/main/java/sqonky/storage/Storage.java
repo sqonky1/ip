@@ -44,12 +44,10 @@ public class Storage {
 
     /**
      * Loads the task list from the storage file.
-     * <p>If the file does not exist, an empty {@code TaskList} is returned.
-     * It parses the file content line by line to reconstruct {@code ToDo},
-     * {@code Deadline}, and {@code Event} objects.</p>
+     * Updated to filter out duplicate entries found within the save file.
      *
-     * @return A {@code TaskList} containing the tasks loaded from the file.
-     * @throws SqonkyException If an error occurs during the parsing of task data.
+     * @return A {@code TaskList} containing unique tasks from the file.
+     * @throws SqonkyException If an error occurs during parsing.
      */
     public TaskList load() throws SqonkyException {
         TaskList tasks = new TaskList();
@@ -65,7 +63,11 @@ public class Storage {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                tasks.add(getTask(line));
+
+                Task task = getTask(line);
+                if (!tasks.contains(task)) {
+                    tasks.add(task);
+                }
             }
         } catch (IOException | SqonkyException e) {
             System.out.println("Error loading tasks: " + e.getMessage());

@@ -193,14 +193,17 @@ public class Sqonky {
     }
 
     /**
-     * Centralizes the logic for adding a task, saving to storage, and generating the response.
-     * This helper method reduces code duplication across different task types.
+     * Centralizes task addition with a duplicate check constraint.
+     * If the task is already present, it rejects the addition to keep the list clean.
      *
      * @param t The task object to be added.
-     * @return The response string from the UI.
-     * @throws SqonkyException If an error occurs during saving.
+     * @return The confirmation message.
+     * @throws SqonkyException If a duplicate task is detected or saving fails.
      */
     private String addTaskAndSave(Task t) throws SqonkyException {
+        if (tasks.contains(t)) {
+            throw new SqonkyException("Duplicate detected! This task is already in your list.");
+        }
         tasks.add(t);
         storage.save(tasks);
         return ui.getTaskAdded(t, tasks.size());

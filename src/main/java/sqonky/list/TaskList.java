@@ -241,4 +241,19 @@ public class TaskList {
         sb.append(ui.getEmptyLine());
         return sb.toString();
     }
+
+    /**
+     * Checks if a task already exists in the current list to prevent duplicates.
+     *
+     * @param task The task object to check for.
+     * @return true if a duplicate task is found in the list, false otherwise.
+     */
+    public boolean contains(Task task) {
+        for (Task t : tasks) {
+            if (t.isDuplicate(task)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

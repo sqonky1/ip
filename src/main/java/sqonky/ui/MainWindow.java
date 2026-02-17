@@ -35,8 +35,27 @@ public class MainWindow extends AnchorPane {
     public void initialize() {
         scrollPane.vvalueProperty().bind(dialogContainer.heightProperty());
 
-        String css = Objects.requireNonNull(this.getClass().getResource("/css/stylesheet.css")).toExternalForm();
+        scrollPane.setFitToWidth(true);
+
+        String css = Objects.requireNonNull(this.getClass().getResource("/css/stylesheet.css"))
+                .toExternalForm();
         this.getStylesheets().add(css);
+
+        // AI-Assisted Code: Used Gemini to set anchor constraints for dynamic UI resizing
+        // 1. Pin the scrollPane to Top, Left, Right, and above the input bar
+        AnchorPane.setTopAnchor(scrollPane, 0.0);
+        AnchorPane.setLeftAnchor(scrollPane, 0.0);
+        AnchorPane.setRightAnchor(scrollPane, 0.0);
+        AnchorPane.setBottomAnchor(scrollPane, 55.0); // Leave 55px space at bottom
+
+        // 2. Pin the input box to Bottom and Left, stretch it to the Right (stopping at button)
+        AnchorPane.setBottomAnchor(userInput, 10.0);
+        AnchorPane.setLeftAnchor(userInput, 10.0);
+        AnchorPane.setRightAnchor(userInput, 85.0); // Leave 85px space for button
+
+        // 3. Pin the send button to Bottom and Right
+        AnchorPane.setBottomAnchor(sendButton, 10.0);
+        AnchorPane.setRightAnchor(sendButton, 10.0);
     }
 
     /** Injects the Sqonky instance */

@@ -182,14 +182,14 @@ public class TaskList {
 
             int count = 0;
             for (Task t : tasks) {
-                boolean matches = false;
+                boolean isMatching = false;
                 if (t instanceof Deadline) {
-                    matches = ((Deadline) t).getBy().toLocalDate().equals(searchDate);
+                    isMatching = ((Deadline) t).getBy().toLocalDate().equals(searchDate);
                 } else if (t instanceof Event) {
-                    matches = ((Event) t).getFrom().toLocalDate().equals(searchDate);
+                    isMatching = ((Event) t).getFrom().toLocalDate().equals(searchDate);
                 }
 
-                if (matches) {
+                if (isMatching) {
                     count++;
                     sb.append(ui.getTaskItem(count, t));
                 }

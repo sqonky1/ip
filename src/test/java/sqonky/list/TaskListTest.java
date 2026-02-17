@@ -48,13 +48,13 @@ public class TaskListTest {
         list.add(new ToDo("write code"));
 
         // Logical check: verify that at least one task contains the keyword 'book'
-        boolean found = false;
+        boolean isFound = false;
         for (Task t : list.getAllTasks()) {
             if (t.toString().contains("book")) {
-                found = true;
+                isFound = true;
                 break;
             }
         }
-        assertTrue(found);
+        assertTrue(isFound);
     }
 }

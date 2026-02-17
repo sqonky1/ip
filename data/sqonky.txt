@@ -1,5 +1,0 @@
-T | 1 | read book
-D | 0 | return book | 2026-06-06T18:00
-E | 0 | career fair | 2026-08-06T10:00 to 2026-08-06T16:00
-T | 0 | persistence test
-T | 1 | meow

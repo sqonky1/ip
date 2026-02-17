@@ -24,5 +24,6 @@ production/
 *.jar
 
 # Data files
+data/
 text-ui-test/data/
 /data/

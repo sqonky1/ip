@@ -14,6 +14,7 @@ public class Sqonky {
     private final Storage storage;
     private TaskList tasks;
     private final Ui ui;
+    private String loadError = "";
 
     /**
      * Overloaded constructor for JavaFX that uses a default file path.
@@ -33,7 +34,7 @@ public class Sqonky {
         try {
             tasks = storage.load();
         } catch (SqonkyException e) {
-            ui.getLoadingError();
+            loadError = ui.getLoadingError();
             tasks = new TaskList();
         }
     }
@@ -215,6 +216,6 @@ public class Sqonky {
      * @return The welcome string.
      */
     public String getWelcomeMessage() {
-        return ui.getWelcome();
+        return loadError + ui.getWelcome();
     }
 }

@@ -70,7 +70,7 @@ public class Storage {
                 }
             }
         } catch (IOException | SqonkyException e) {
-            System.out.println("Error loading tasks: " + e.getMessage());
+            throw new SqonkyException("Error loading tasks: " + e.getMessage());
         }
 
         return tasks;

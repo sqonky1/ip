@@ -7,7 +7,7 @@
 ## Getting Started
 
 1. Ensure you have Java `17` installed in your computer.
-2. Download the latest `sqonky.jar` from the [releases page](../../releases).
+2. Download the latest `sqonky.jar` from the [releases page](https://github.com/sqonky1/ip/releases).
 3. Copy the file to the folder you want to use as the *home folder* for your daily tasks.
 4. Double-click the file to start the app.
 5. Type the command in the chat box and press Enter to execute it. e.g. typing `help` will list the commands.
